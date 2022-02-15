@@ -14,5 +14,6 @@ All of the code/files are contained within GitHub - SpringFactory
 git clone https://github.com/jshessen/SpringFactory
 ```
 
-The overall project is also availale on Thingiverse
-https://www.thingiverse.com/thing:5248625
+The overall project is also availale on
+Thingiverse - https://www.thingiverse.com/thing:5248625
+PrusaPrinters - https://www.prusaprinters.org/prints/134958-spring-factory-parametric
