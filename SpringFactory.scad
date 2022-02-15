@@ -40,8 +40,11 @@ use <BOSL/shapes.scad>;
 // Display Verbose Output?
 VERBOSE=1; // [1:Yes,0:No]
 SHOW_CUTOUTS=0; // [1:Yes,0:No]
+SHOW_REFERENCE=0; // [1:Yes,0:No]
 
 /* ["The Bolt" Parameters] */
+// Display Bolt
+SHOW_BOLT=1; // [1:Yes,0:No]
 // Length (X) of the Bolt grip
 custom_bolt_grip_length=60; // [0:.1:100]
 // Width (Y) of the Bolt grip
@@ -58,6 +61,8 @@ custom_bolt_pitch=2.4; // [0.2:0.01:6]
 custom_bolt_base_diameter=31.8; // [20:.1:80]
 
 /* ["The Screw" Parameters] */
+// Display Screw
+SHOW_SCREW=1; // [1:Yes,0:No]
 // Length (X) of the Screw grip
 custom_screw_grip_length=47; // [0:.1:100]
 // Width (Y) of the Screw grip
@@ -72,6 +77,8 @@ custom_screw_pitch=2.4; // [0.2:0.01:6]
 custom_screw_base_diameter=14.9836; // [1:1:210]
 
 /* ["The Cap" Parameters] */
+// Display Cap
+SHOW_CAP=1; // [1:Yes,0:No]
 // Diameter of Screw/Nut
 custom_cap_diameter=8; // [0.1:0.01:54]
 // Pitch of the Screw
@@ -118,7 +125,9 @@ cap_pitch=(custom_cap_pitch==0) ? bolt_pitch : custom_cap_pitch;
         N/A
 */
 // Example: Make sample objects
-   show_reference_objects();
+if(SHOW_REFERENCE){
+    show_reference_objects();
+}
 //////////////////////////////////////////////////////////////////////
 module show_reference_objects(){
     // The Bolt
@@ -152,15 +161,21 @@ module show_reference_objects(){
    make_SpringFactory();
 //////////////////////////////////////////////////////////////////////
 module make_SpringFactory(){
-    make_bolt(bolt_base_diameter,
-              bolt_grip_width, bolt_grip_length, bolt_grip_height,
-              bolt_diameter, bolt_length, bolt_pitch);
-    rotate([0,0,90]) translate([0,0,35.1])
-        make_screw(screw_base_diameter,
-                   screw_grip_width, screw_grip_length, screw_grip_height,
-                   screw_diameter, screw_grip_height*1.5, screw_pitch);
-    translate([33,0,0])
-        make_cap(cap_diameter, cap_pitch*1.5, cap_pitch);
+    if(SHOW_BOLT){
+        make_bolt(bolt_base_diameter,
+                  bolt_grip_width, bolt_grip_length, bolt_grip_height,
+                  bolt_diameter, bolt_length, bolt_pitch);
+    }
+    if(SHOW_SCREW){
+        rotate([0,0,90]) translate([0,0,35.1])
+            make_screw(screw_base_diameter,
+                       screw_grip_width, screw_grip_length, screw_grip_height,
+                       screw_diameter, screw_grip_height*1.5, screw_pitch);
+    }
+    if(SHOW_CAP){
+        translate([33,0,0])
+            make_cap(cap_diameter, cap_pitch*1.5, cap_pitch);
+    }
 }
 
 
