@@ -22,3 +22,8 @@ The overall project is also availale on
 ### This program is dependent upon the BOSL Library (included as a Git submodule) 
 BOSL - https://github.com/revarbat/BOSL
 The Belfry OpenScad Library - A library of tools, shapes, and helpers to make OpenScad easier to use.
+
+You may require an explicity initialization of the submodule after cloning
+```shell
+git submodule update --init --recursive
+```
