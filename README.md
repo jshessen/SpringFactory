@@ -17,3 +17,8 @@ git clone https://github.com/jshessen/SpringFactory
 The overall project is also availale on
 - Thingiverse - https://www.thingiverse.com/thing:5248625
 - PrusaPrinters - https://www.prusaprinters.org/prints/134958-spring-factory-parametric
+
+
+### This program is dependent upon the BOSL Library (included as a Git submodule) 
+BOSL - https://github.com/revarbat/BOSL
+The Belfry OpenScad Library - A library of tools, shapes, and helpers to make OpenScad easier to use.
