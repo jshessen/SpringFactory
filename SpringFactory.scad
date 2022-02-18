@@ -286,7 +286,7 @@ module make_SpringFactory(){
         pitch = The length between threads
 */
 // Example: Make sample object
-//   make_bolt(bolt_base_diameter, bolt_grip_width, bolt_grip_length, bolt_grip_height, bolt_diameter, bolt_length, bolt_pitch);
+//   make_bolt(bolt_diameter, bolt_length, bolt_pitch, bolt_grip_length, bolt_grip_width, bolt_grip_height, bolt_base_diameter);
 //////////////////////////////////////////////////////////////////////
 module make_bolt(d,l,pitch,
                  grip_length, grip_width, grip_height,
@@ -322,7 +322,7 @@ module make_bolt(d,l,pitch,
         cutout_angle = The off-set angle (from zero-degrees) for the wire catch relief
 */
 // Example: Make sample object
-//   make_bolt_base(bolt_base_diameter, bolt_grip_height);
+//   make_bolt_base(base_diameter,grip_height);
 //////////////////////////////////////////////////////////////////////
 module make_bolt_base(d, h, cutout_angle=13){
     if(VERBOSE) echo("----> Begin \"Bolt\" Base Creation");
@@ -508,7 +508,7 @@ module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0
         pitch = The length between threads
 */
 // Example: Make sample object
-//   make_screw(screw_base_diameter, screw_grip_width, screw_grip_length, screw_grip_height, screw_diameter, screw_grip_height*1.5, screw_pitch);
+//   make_screw(screw_diameter, screw_grip_height, screw_pitch, screw_grip_length, screw_grip_width, screw_grip_height, screw_base_diameter);
 //////////////////////////////////////////////////////////////////////
 module make_screw(d,l,pitch,
                   grip_length,grip_width,grip_height,
@@ -616,7 +616,7 @@ module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
         pitch = The length between threads
 */
 // Example: Make sample object
-//   make_cap(cap_diameter, screw_grip_height*1.5, screw_pitch);
+//   make_cap(cap_diameter, cap_rotations, cap_pitch);
 //////////////////////////////////////////////////////////////////////
 module make_cap(d,l,pitch){
     base=d*1.124;
