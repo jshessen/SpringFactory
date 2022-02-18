@@ -39,48 +39,63 @@ use <BOSL/shapes.scad>;
 /* [General OpenSCAD Parameters] */
 // Display Verbose Output?
 VERBOSE=1; // [1:Yes,0:No]
-SHOW_CUTOUTS=0; // [1:Yes,0:No]
-SHOW_REFERENCE=0; // [1:Yes,0:No]
+/* [Hidden] */
+//$fa = 0.1;
+//$fs = 0.1;
+
+/* [Spring Factory Parameters] */
+// Show Reference Model
+show_reference_model=1; // [1:Yes,0:No]
+// Overlap or Offset Reference Model
+offset_reference_model=1; // [0:Overlap,1:Offset]
+// Display Spring Factory 'Cutouts'
+display_cutouts=0; // [1:Yes,0:No]
+// Display "Functional" view vs. "Printable" view
+display_printable=1; // [0:Functional,1:Printable]
+// Sync "Factory" ("Screw" and "Cap" = "Bolt") parameters
+sync_factory=1; // [1:Yes,0:No]
 
 /* ["The Bolt" Parameters] */
 // Display Bolt
-SHOW_BOLT=1; // [1:Yes,0:No]
-// Length (X) of the Bolt grip
-custom_bolt_grip_length=60; // [0:.1:100]
-// Width (Y) of the Bolt grip
-custom_bolt_grip_width=6; // [0:1:10]
-// Height (Z) of the Bolt grip
-custom_bolt_grip_height=6; // [0:1:10]
-// Length (Z) of the Bolt
-custom_bolt_length=47.5; // [10:.1:250]
+display_bolt=1; // [1:Yes,0:No]
 // Diameter of the Bolt.
 custom_bolt_diameter=8; // [.01:.01:210]
+// Length (Z) of the Bolt
+custom_bolt_length=47.5; // [10:.1:250]
 // Pitch of the Bolt
 custom_bolt_pitch=2.4; // [0.2:0.01:6]
+// Length (X) of the Bolt grip
+custom_bolt_grip_length=59.935; // [0:.001:100]
+// Width (Y) of the Bolt grip
+custom_bolt_grip_width=5.835; // [0:.001:10]
+// Height (Z) of the Bolt grip
+custom_bolt_grip_height=5.7835; // [0:.001:10]
 // Diameter of Bolt Base
-custom_bolt_base_diameter=31.8; // [20:.1:80]
+custom_bolt_base_diameter=31.983; // [20:.1:80]
 
 /* ["The Screw" Parameters] */
 // Display Screw
-SHOW_SCREW=1; // [1:Yes,0:No]
-// Length (X) of the Screw grip
-custom_screw_grip_length=47; // [0:.1:100]
-// Width (Y) of the Screw grip
-custom_screw_grip_width=6.27; // [1:1:210]
-// Height (Z) of the Screw grip
-custom_screw_grip_height=6.27; // [1:1:250]
+display_screw=1; // [1:Yes,0:No]
 // Diameter of Screw/Nut
 custom_screw_diameter=8; // [.2:0.01:54]
+// Length (X) of the Screw grip
+custom_screw_grip_length=47.8; // [0:.1:100]
 // Pitch of the Screw
 custom_screw_pitch=2.4; // [0.2:0.01:6]
+// Width (Y) of the Screw grip
+custom_screw_grip_width=5.835; // [1:.1:210]
+// Height (Z) of the Screw grip
+custom_screw_grip_height=6.62; // [1:.1:250]
 // Diameter of Screw Base
 custom_screw_base_diameter=14.9836; // [1:1:210]
 
 /* ["The Cap" Parameters] */
 // Display Cap
-SHOW_CAP=1; // [1:Yes,0:No]
+display_cap=1; // [1:Yes,0:No]
 // Diameter of Screw/Nut
 custom_cap_diameter=8; // [0.1:0.01:54]
+// Rotations (R) of the Cap
+custom_cap_rotations=1.6; // [0.1:0.001:54]
 // Pitch of the Screw
 custom_cap_pitch=2.4; // [0.2:0.01:6]
 
@@ -95,25 +110,44 @@ custom_cap_pitch=2.4; // [0.2:0.01:6]
 */
 //////////////////////////////////////////////////////////////////////
 // The Bolt
-bolt_grip_length=(custom_bolt_grip_length==0) ? 60 : custom_bolt_grip_length;
-bolt_grip_width=(custom_bolt_grip_width==0) ? bolt_grip_length/10 : custom_bolt_grip_width;
-bolt_grip_height=(custom_bolt_grip_height==0) ? bolt_grip_width : custom_bolt_grip_height;
-bolt_length=(custom_bolt_length==0) ? 47.5 : custom_bolt_length;
-bolt_diameter=(custom_bolt_diameter==0) ? 8 : custom_bolt_diameter;
-bolt_pitch=(custom_bolt_pitch==0) ? 2.4 : custom_bolt_pitch;
-bolt_base_diameter=(custom_bolt_base_diameter==0) ? bolt_grip_length*0.53 : custom_bolt_base_diameter;
+bolt_diameter=custom_bolt_diameter;
+bolt_length=custom_bolt_length;
+bolt_pitch=custom_bolt_pitch;
+bolt_grip_length=custom_bolt_grip_length;
+// set base width/height/diameter relative to bolt_grip_length
+bolt_grip_width=(bolt_grip_length==59.935) ? custom_bolt_grip_width :
+                ((custom_bolt_grip_width!=5.835) ? custom_bolt_grip_width :
+                bolt_grip_length*(5.385/59.935));
+bolt_grip_height=(bolt_grip_width==5.7835) ? custom_bolt_grip_height :
+                 ((custom_bolt_grip_height!=bolt_grip_width) ? custom_bolt_grip_height :
+                 bolt_grip_width);
+bolt_base_diameter=(bolt_grip_length==59.935) ? custom_bolt_base_diameter :
+                   ((custom_bolt_base_diameter!=31.983) ? custom_bolt_base_diameter :
+                   bolt_grip_length*(31.983/59.935));
 
 // The Screw
-screw_grip_length=(custom_screw_grip_length==0) ? 47 : custom_screw_grip_length;
-screw_grip_width=(custom_screw_grip_width==0) ? screw_grip_length/7.5 : custom_screw_grip_width;
-screw_grip_height=(custom_screw_grip_height==0) ? screw_grip_width : custom_screw_grip_height;
-screw_diameter=(custom_screw_diameter==0) ? bolt_diameter: custom_screw_diameter;
-screw_pitch=(custom_screw_pitch==0) ? bolt_pitch : custom_screw_pitch;
-screw_base_diameter=(custom_screw_base_diameter==0) ? screw_grip_length*0.3188 : custom_screw_base_diameter;
+screw_diameter=(sync_factory) ? bolt_diameter : custom_screw_diameter;
+screw_pitch=(sync_factory) ? bolt_pitch : custom_screw_pitch;            
+screw_grip_length=(sync_factory) ? bolt_grip_length*(47.8/bolt_grip_length) : custom_screw_grip_length;
+// set width/height/diameter relative to screw_grip_length
+screw_grip_width=(sync_factory) ? screw_grip_length*(5.835/47.8) :
+                 ((custom_screw_grip_width!=5.835) ? custom_screw_grip_width :
+                 screw_grip_length*(5.835/47.8));
+screw_grip_height=(sync_factory) ? screw_grip_width*(6.62/5.835) :
+                  ((custom_screw_grip_height!=6.62) ? custom_screw_grip_height :
+                  screw_grip_width*(6.62/5.835));
+screw_base_diameter=(sync_factory) ? bolt_diameter*(14.9836/8) :
+                    ((custom_screw_base_diameter!=14.9836) ? custom_screw_base_diameter :
+                    screw_grip_length*(14.9836/47.8));
 
 //The Cap
-cap_diameter=(custom_cap_diameter==0) ? bolt_diameter: custom_cap_diameter;
-cap_pitch=(custom_cap_pitch==0) ? bolt_pitch : custom_cap_pitch;
+cap_diameter=(sync_factory) ? bolt_diameter :
+             ((custom_cap_diameter==0) ? bolt_diameter :
+             custom_cap_diameter);
+cap_pitch=(sync_factory) ? bolt_pitch :
+          ((custom_cap_pitch==0) ? bolt_pitch :
+          custom_cap_pitch);
+cap_rotations=custom_cap_rotations*cap_pitch;
 
 //////////////////////////////////////////////////////////////////////
 // Module: show_reference_objects()
@@ -125,25 +159,69 @@ cap_pitch=(custom_cap_pitch==0) ? bolt_pitch : custom_cap_pitch;
         N/A
 */
 // Example: Make sample objects
-if(SHOW_REFERENCE){
+if(show_reference_model){
     show_reference_objects();
 }
 //////////////////////////////////////////////////////////////////////
 module show_reference_objects(){
+    offset=(offset_reference_model) ? (bolt_base_diameter*.5)+(screw_grip_length) : 0;
     // The Bolt
-    color(c=[106,90,205]/255) {
-        translate([-33.5,-3,2]) 
-            import("./reference/SpringFactory1.2_TheBolt.stl");
+    if(display_bolt){
+        // Shift Import to [0,0,0]
+        x_origin=-(93.489);
+        y_origin=-(3.0);
+        z_origin=1.792;
+        
+        // Set Color
+        c=[106,90,205]/255;
+        // Offset/Printable
+        x=offset;
+        y=0;
+        z=0;
+        
+        translate([x,y,z]) color(c=c)
+            translate([x_origin,y_origin,z_origin])
+                import("./reference/SpringFactory1.2_TheBolt.stl");
     }
     // The Screw
-    color(c=[186,85,211]/255,alpha=0.75) {
-        translate([2.2,34.422,31])
-            import("./reference/SpringFactory1.2_TheScrew.stl");
+    if(display_screw){
+        // Shift object to [0,0,0]
+        x_origin=-(57.8);
+        y_origin=34.422;
+        z_origin=-(4.1013);
+        
+        // Set Color
+        c=[186,85,211]/255;
+        // Offset
+        x=(display_printable) ?
+            ((display_bolt) ?
+                offset+(bolt_base_diameter*.4)+(screw_base_diameter*.5) :
+                offset) :
+            offset;
+        y=(display_bolt) ? x-offset : 0;
+        z=(display_printable) ? 0 : bolt_length*(.95-(screw_pitch/100));
+        r_x=(display_printable) ? 0 : 180;
+        r_z=(display_printable) ? -45 : 0;
+       
+        translate([x,y,z]) rotate([r_x,0,r_z]) color(c=c,alpha=0.75)
+            translate([x_origin,y_origin,z_origin])
+                import("./reference/SpringFactory1.2_TheScrew.stl");
     }
     // The Cap
-    color(c=[138,43,226]/255,alpha=0.75) {
-        translate([-40.15,-3.918,0])
-            import("./reference/SpringFactory1.2_TheCap.stl");
+    if(display_cap){
+        // Shift object to [0,0,0]
+        x_origin=-(133.15);
+        y_origin=-(3.9175);
+        z_origin=0;
+        
+        // Set Color
+        c=[138,43,226]/255;
+        // Offset
+        x=(display_bolt || display_screw) ? offset + (bolt_base_diameter/2)+(cap_diameter*1.2) : offset;
+        r=-15;
+        translate([x,0,0]) rotate([0,0,r]) color(c=c,alpha=0.75)
+            translate([x_origin,y_origin,z_origin])
+                import("./reference/SpringFactory1.2_TheCap.stl");
     }
 }
 
@@ -161,20 +239,30 @@ module show_reference_objects(){
    make_SpringFactory();
 //////////////////////////////////////////////////////////////////////
 module make_SpringFactory(){
-    if(SHOW_BOLT){
-        make_bolt(bolt_base_diameter,
-                  bolt_grip_width, bolt_grip_length, bolt_grip_height,
-                  bolt_diameter, bolt_length, bolt_pitch);
+    if(display_bolt){
+        make_bolt(bolt_diameter, bolt_length, bolt_pitch,
+                  bolt_grip_length, bolt_grip_width, bolt_grip_height,
+                  bolt_base_diameter);
     }
-    if(SHOW_SCREW){
-        rotate([0,0,90]) translate([0,0,35.1])
-            make_screw(screw_base_diameter,
-                       screw_grip_width, screw_grip_length, screw_grip_height,
-                       screw_diameter, screw_grip_height*1.5, screw_pitch);
+    if(display_screw){
+        x=(display_printable) ?
+            ((display_bolt) ?
+                (bolt_base_diameter*.4)+(screw_base_diameter*.5) :
+                0) :
+            0;
+        y=x;
+        z=(display_printable) ? 0 : bolt_length*(.95-(screw_pitch/100));
+        r_x=(display_printable) ? 0 : 180;
+        r_z=(display_printable) ? 45 : -90;
+        translate([x,y,z]) rotate([r_x,0,r_z]) 
+                make_screw(screw_diameter, screw_grip_height, screw_pitch,
+                           screw_grip_length, screw_grip_width, screw_grip_height,
+                           screw_base_diameter);
     }
-    if(SHOW_CAP){
-        translate([33,0,0])
-            make_cap(cap_diameter, cap_pitch*1.5, cap_pitch);
+    if(display_cap){
+        x=(display_bolt || display_screw) ? (bolt_base_diameter/2)+(cap_diameter*1.2) : 0;
+        translate([x,0,0])
+            make_cap(cap_diameter, cap_rotations, cap_pitch);
     }
 }
 
@@ -200,9 +288,9 @@ module make_SpringFactory(){
 // Example: Make sample object
 //   make_bolt(bolt_base_diameter, bolt_grip_width, bolt_grip_length, bolt_grip_height, bolt_diameter, bolt_length, bolt_pitch);
 //////////////////////////////////////////////////////////////////////
-module make_bolt(base_diameter,
-                 grip_width, grip_length, grip_height,
-                 diameter, length, pitch){
+module make_bolt(d,l,pitch,
+                 grip_length, grip_width, grip_height,
+                 base_diameter){
     union(){
         // Base
         if(VERBOSE) echo("--> Make \"Bolt\" Base");
@@ -213,13 +301,13 @@ module make_bolt(base_diameter,
         // Threads
         if(VERBOSE) echo("--> Make \"Bolt\" Threads");
         translate([0,0,grip_height])
-            make_bolt_thread(diameter, length, pitch);
+            make_bolt_thread(d, l, pitch);
         // Wire Eyelet
         if(VERBOSE) echo("--> Make \"Bolt\" Wire Eyelet");
-        make_bolt_wire_eyelet(grip_width, grip_height, base_diameter/2, angle=27, z_rotation=3);
+        make_bolt_wire_eyelet(grip_width, grip_height, (grip_height*1.71)-grip_height, base_diameter/2, angle=27, z_rotation=3);
         // Wire Catch
         if(VERBOSE) echo("--> Make \"Bolt\" Wire Catch");
-        make_bolt_wire_catch(grip_width, grip_height, base_diameter/2, angle=27, z_rotation=-21);
+        make_bolt_wire_catch(grip_width, grip_height, (grip_height*1.71)-grip_height, base_diameter/2, angle=25.4, z_rotation=-20.83);
     }
 }
 //////////////////////////////////////////////////////////////////////
@@ -245,11 +333,11 @@ module make_bolt_base(d, h, cutout_angle=13){
         // Base
         cylinder(h=h,d=d,$fn=360);
         // Cutout
-        rotate([0,0,cutout_angle]) translate([d*.155,-d/2,h*.89]) {
-            if(SHOW_CUTOUTS){
-                #cube([d*.23,d,h*.13]);
+        rotate([0,0,cutout_angle]) translate([d*.143,-d/2,h*.89]) {
+            if(display_cutouts){
+                #cube([d*.2,d,h*.13]);
             } else {
-                cube([d*.23,d,h*.13]);
+                cube([d*.25,d,h*.13]);
             }
         }
     }
@@ -273,8 +361,8 @@ module make_bolt_grip(x,y,z){
     if(VERBOSE) echo(str("**======> Grip Width (X): ",x,"**"));
     if(VERBOSE) echo(str("**======> Grip Length (Y): ",y,"**"));
     if(VERBOSE) echo(str("**======> Grip Height (Z): ",z,"**"));
-    translate([0,0,(z*.97)/2+0.1])
-        cuboid([x,y,z*.97], fillet=1);
+    translate([0,0,((z*.97)/2)+(z*.014)])
+        cuboid([x,y,(z*.97)], fillet=1);
 }
 //////////////////////////////////////////////////////////////////////
 // Module: make_bolt_thread()
@@ -314,10 +402,11 @@ module make_bolt_thread(d,l,pitch){
 // Example: Make sample object
 //   make_bolt_wire_eyelet(bolt_grip_width, bolt_grip_height, bolt_base_diameter/2);
 //////////////////////////////////////////////////////////////////////
-module make_bolt_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
+module make_bolt_wire_eyelet(width,height,extension,radius, angle=0, z_rotation=0){
+    combined_height=height+extension;
     if(VERBOSE) echo("----> Begin \"Bolt\" Eyelet Creation");
     if(VERBOSE) echo(str("**======> Eyelet Width (X): ",width,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Height (Z): ",height,"**"));
+    if(VERBOSE) echo(str("**======> Eyelet Height (Z): ",combined_height,"**"));
     if(VERBOSE) echo(str("**======> Eyelet Radius (r): ",radius,"**"));
     if(VERBOSE) echo(str("**======> Eyelet Extrusion Length: ",angle,"**"));
     if(VERBOSE) echo(str("**======> Eyelet Z-Rotation Offset Angle: ",z_rotation,"**"));
@@ -327,10 +416,10 @@ module make_bolt_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
             // Construct Frame
             rotate([0,0,-angle/2]) // Align to X axis
                 rotate_extrude(angle=angle, $fn=360) translate([radius-(width/2),0,0])
-                    square([width/2,height*1.67]);
+                    square([width/2,combined_height]);
             // Construct Eyelet
-            translate([radius-width/4,0,height*1.3]) rotate([45,0,0]){
-                if(SHOW_CUTOUTS){
+            translate([radius-width/4,width*.102,combined_height*.75]) rotate([45,0,-20]){
+                if(display_cutouts){
                     #cube([width,width/3,width/3],center=true);
                 } else {
                     cube([width,width/3,width/3],center=true);
@@ -355,10 +444,11 @@ module make_bolt_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
 // Example: Make sample object
 //   make_bolt_wire_catch(bolt_grip_width, bolt_grip_height, bolt_base_diameter/2);
 //////////////////////////////////////////////////////////////////////
-module make_bolt_wire_catch(width,height,radius, angle=0, z_rotation=0){
+module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0, base_height){
+    combined_height=height+extension;
     if(VERBOSE) echo("----> Begin \"Bolt\" Catch Creation");
     if(VERBOSE) echo(str("**======> Catch Width (X): ",width,"**"));
-    if(VERBOSE) echo(str("**======> Catch Height (Z): ",height,"**"));
+    if(VERBOSE) echo(str("**======> Catch Height (Z): ",combined_height,"**"));
     if(VERBOSE) echo(str("**======> Catch Radius (r): ",radius,"**"));
     if(VERBOSE) echo(str("**======> Catch Extrusion Length: ",angle,"**"));
     if(VERBOSE) echo(str("**======> Catch Z-Rotation Offset Angle: ",z_rotation,"**"));
@@ -368,7 +458,7 @@ module make_bolt_wire_catch(width,height,radius, angle=0, z_rotation=0){
             // Construct Frame
             rotate([0,0,-angle/2]) // Align to X axis
                 rotate_extrude(angle=angle, $fn=360) translate([radius,0,0])
-                    square([width/2,height*1.67]);
+                    square([width/2,combined_height]);
             // Construct Slot for Wire in Wire Catch
             translate([radius-width/4,0,height]){
                 difference(){    
@@ -376,14 +466,16 @@ module make_bolt_wire_catch(width,height,radius, angle=0, z_rotation=0){
                         union() {
                             a=[height/2,width*angle/18];
                             b=[0,width*angle/18];
-                            if(SHOW_CUTOUTS){
-                                #prismoid(size1=a,size2=b,shift=[-height/4,0],h=height*.84);
+                            s=[height/4,0];
+                            h=height*.84;
+                            if(display_cutouts){
+                                #prismoid(size1=a,size2=b,shift=-s,h=h);
                                 #translate([-height*0.18,0,0])
-                                    prismoid(size1=b,size2=a,shift=[height/4,0],h=height*.84);
+                                    prismoid(size1=b,size2=a,shift=s,h=h);
                             } else {
-                                prismoid(size1=a,size2=b,shift=[-height/4,0],h=height*.84);
+                                prismoid(size1=a,size2=b,shift=-s,h=h);
                                 translate([-height*0.18,0,0])
-                                    prismoid(size1=b,size2=a,shift=[height/4,0],h=height*.84);
+                                    prismoid(size1=b,size2=a,shift=s,h=h);
                             }
                         }
                     }
@@ -418,42 +510,43 @@ module make_bolt_wire_catch(width,height,radius, angle=0, z_rotation=0){
 // Example: Make sample object
 //   make_screw(screw_base_diameter, screw_grip_width, screw_grip_length, screw_grip_height, screw_diameter, screw_grip_height*1.5, screw_pitch);
 //////////////////////////////////////////////////////////////////////
-module make_screw(base_diameter,grip_width,grip_length,grip_height, d,l,pitch){
+module make_screw(d,l,pitch,
+                  grip_length,grip_width,grip_height,
+                  base_diameter){
     union(){
-        translate([0,0,grip_height/2]) {
-            difference(){
-                union(){
-                    // Base
-                    h=grip_height*1.24;
-                    if(VERBOSE) echo("--> Make \"Screw\" Base");
-                    if(VERBOSE) echo("----> Begin \"Screw\" Base Creation");
-                    if(VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",base_diameter,"**"));
-                    if(VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
-                    translate([0,0,(h-grip_height)/2]) cylinder(h=h*1.,d=base_diameter,center=true,$fn=360);
-                    // Grip
-                    if(VERBOSE) echo("--> Make \"Screw\" Grip");
-                    if(VERBOSE) echo("----> Begin \"Screw\" Grip Creation");
-                    if(VERBOSE) echo(str("**======> Grip Width (X): ",grip_width,"**"));
-                    if(VERBOSE) echo(str("**======> Grip Length (Y): ",grip_length,"**"));
-                    if(VERBOSE) echo(str("**======> Grip Height (Z): ",grip_height,"**"));
-                    cuboid([grip_width,grip_length,grip_height], fillet=1);
-                }
-                // Threads
-                if(VERBOSE) echo("--> Make \"Screw\" Threads");
-                if(VERBOSE) echo("----> Begin \"Screw\" Thread Creation");
-                if(VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
-                if(VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
-                if(VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
-                if(SHOW_CUTOUTS){
-                    #threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
-                } else {
-                    threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
-                }
+        difference(){
+            union(){
+                // Base
+                h=l*1.1775;
+                if(VERBOSE) echo("--> Make \"Screw\" Base");
+                if(VERBOSE) echo("----> Begin \"Screw\" Base Creation");
+                if(VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",base_diameter,"**"));
+                if(VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
+                translate([0,0,h/2]) cylinder(h=h,d=base_diameter,center=true,$fn=360);
+                // Grip
+                if(VERBOSE) echo("--> Make \"Screw\" Grip");
+                if(VERBOSE) echo("----> Begin \"Screw\" Grip Creation");
+                if(VERBOSE) echo(str("**======> Grip Width (X): ",grip_width,"**"));
+                if(VERBOSE) echo(str("**======> Grip Length (Y): ",grip_length,"**"));
+                if(VERBOSE) echo(str("**======> Grip Height (Z): ",grip_height,"**"));
+                translate([0,0,((grip_height*.97)/2)++(grip_height*.0125)])
+                    cuboid([grip_width,grip_length,(grip_height*.97)], fillet=1);
+            }
+            // Threads
+            if(VERBOSE) echo("--> Make \"Screw\" Threads");
+            if(VERBOSE) echo("----> Begin \"Screw\" Thread Creation");
+            if(VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
+            if(VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
+            if(VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
+            if(display_cutouts){
+                #threaded_rod(d=d, l=l*2.5, pitch=pitch, $fa=1, $fs=1);
+            } else {
+                threaded_rod(d=d, l=l*2.5, pitch=pitch, $fa=1, $fs=1);
             }
         }
         // Wire Eyelet
         if(VERBOSE) echo("--> Make \"Screw\" Wire Eyelet");
-        make_screw_wire_eyelet(grip_width*1.275, grip_height*1.899, base_diameter/2, angle=100, z_rotation=-98);
+        make_screw_wire_eyelet(grip_width*1.0276, grip_height*1.8115, base_diameter/2, angle=100, z_rotation=-98);
     }
 }
 //////////////////////////////////////////////////////////////////////
@@ -486,18 +579,18 @@ module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
             rotate([0,0,-angle/2]) // Align to X axis
                 difference(){
                     rotate_extrude(angle=angle, $fn=360) translate([radius-(width/4),0,0])
-                        square([width/2,height]);
-                    translate([radius*.5,-radius*.174,height]) mirror([0,0,1]){
-                        if(SHOW_CUTOUTS){
-                            #interior_fillet(width*1.5,height,ang=100, $fn=100);
+                        square([width*.5,height]);
+                    translate([radius*.5,-radius*.1,height]) mirror([0,0,1]){
+                        if(display_cutouts){
+                            #interior_fillet(width*1.45,height,ang=104, $fn=360);
                         } else {
-                            interior_fillet(width*1.5,height,ang=100, $fn=96);
+                            interior_fillet(radius*1.45,height,ang=104, $fn=360);
                         }
                     }
                 }
             // Construct Eyelet
             translate([radius-width*.15,width*.03,height*.77]) rotate([45,0,-45]){
-                if(SHOW_CUTOUTS){
+                if(display_cutouts){
                     #cube([width,width/4,width/4],center=true);
                 } else {
                     cube([width*1.3,width*.25,width*.25],center=true);
@@ -526,6 +619,7 @@ module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
 //   make_cap(cap_diameter, screw_grip_height*1.5, screw_pitch);
 //////////////////////////////////////////////////////////////////////
 module make_cap(d,l,pitch){
+    base=d*1.124;
     // Threads
     if(VERBOSE) echo("--> Make \"Cap\" Threads");
     if(VERBOSE) echo("----> Begin \"Cap\" Thread Creation");
@@ -538,12 +632,12 @@ module make_cap(d,l,pitch){
                 threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
                 //cylinder(h=l,d=d*1.124,center=true, $fn=360);
                 translate([0,0,-l/2]) linear_extrude(pitch*.24)
-                    circle(d=d*1.124, $fn=360);
+                    circle(d=base, $fn=360);
             }
-            if(SHOW_CUTOUTS){
+            if(display_cutouts){
                 #cylinder(h=l*1.5,d=d-pitch*1.81, center=true, $fn=360);
             } else {
-                cylinder(h=l*1.5,d=d-pitch*1.81, center=true, $fn=360);
+                cylinder(h=l*1.5,d=base*.389, center=true, $fn=360);                    
             }
         }
     }
