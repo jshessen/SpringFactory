@@ -11,7 +11,7 @@ I have included STL for each of the components, as rendered from OpenSCAD, as we
 All of the code/files are contained within GitHub - SpringFactory
 
 ```shell
-git clone https://github.com/jshessen/SpringFactory
+git clone https://github.com/jshessen/SpringFactory.git
 ```
 
 The overall project is also availale on
