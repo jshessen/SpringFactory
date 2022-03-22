@@ -1,6 +1,6 @@
-//////////////////////////////////////////////////////////////////////
-//  SpringFactory: SpringFactory.scad
-/*
+/*&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+&&  SpringFactory: SpringDesigner.scad
+
         Copyright (c) 2022, Jeff Hessenflow
         All rights reserved.
         
@@ -10,19 +10,19 @@
         https://www.thingiverse.com/thing:5171637
         Vincent Baillet
         https://www.thingiverse.com/vbaillet/designs
-*/
-//////////////////////////////////////////////////////////////////////
+&&
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
 
-//////////////////////////////////////////////////////////////////////
-//  GNU GPLv3
-/*
+/*&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+&&  GNU GPLv3
+&&
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-*/
-//////////////////////////////////////////////////////////////////////
+&&
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
 
 
 // BOSL Library -- https://github.com/revarbat/BOSL
@@ -30,18 +30,17 @@ use <BOSL/threading.scad>;
 use <BOSL/shapes.scad>;
 
 
-//////////////////////////////////////////////////////////////////////
-//  Customizer
-/*
-    Define Menu(s) and Default Values
-*/
-//////////////////////////////////////////////////////////////////////
-/* [General OpenSCAD Parameters] */
+/*?????????????????????????????????????????????????????????????????
+/*???????????????????????????????????????????????????????
+?? Section: Customizer
+??
+    Description:
+        The Customizer feature provides a graphic user interface for editing model parameters.
+??
+???????????????????????????????????????????????????????*/
+/* [Global] */
 // Display Verbose Output?
-VERBOSE=1; // [1:Yes,0:No]
-/* [Hidden] */
-//$fa = 0.1;
-//$fs = 0.1;
+$VERBOSE=1; // [0:No,1:Level=1,2:Level=2,3:Developer]
 
 /* [Spring Factory Parameters] */
 // Show Reference Model
@@ -98,17 +97,19 @@ custom_cap_diameter=8; // [0.1:0.01:54]
 custom_cap_rotations=1.6; // [0.1:0.001:54]
 // Pitch of the Screw
 custom_cap_pitch=2.4; // [0.2:0.01:6]
+/*
+?????????????????????????????????????????????????????????????????*/
 
+
+
+
+
+/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Section: Derived Variables
+*/
 /* [Hidden] */
 //$fa = 0.1;
 //$fs = 0.1;
-
-//////////////////////////////////////////////////////////////////////
-//  Define default values if Customizer is not used
-/*
-    If the corresponding input variable is not the default value, define sample working values
-*/
-//////////////////////////////////////////////////////////////////////
 // The Bolt
 bolt_diameter=custom_bolt_diameter;
 bolt_length=custom_bolt_length;
@@ -148,10 +149,19 @@ cap_pitch=(sync_factory) ? bolt_pitch :
           ((custom_cap_pitch==0) ? bolt_pitch :
           custom_cap_pitch);
 cap_rotations=custom_cap_rotations*cap_pitch;
-
-//////////////////////////////////////////////////////////////////////
-// Module: show_reference_objects()
 /*
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+
+
+
+
+
+/*/////////////////////////////////////////////////////////////////
+// Section: Modules
+*/
+/*///////////////////////////////////////////////////////
+// Module: show_reference_objects()
+//
     Description:
         Wrapper module to display original STL files for comparison
 
@@ -162,7 +172,7 @@ cap_rotations=custom_cap_rotations*cap_pitch;
 if(show_reference_model){
     show_reference_objects();
 }
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module show_reference_objects(){
     offset=(offset_reference_model) ? (bolt_base_diameter*.5)+(screw_grip_length) : 0;
     // The Bolt
@@ -226,9 +236,9 @@ module show_reference_objects(){
 }
 
 
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_SpringFactory()
-/*
+//
     Description:
         Wrapper module to create all Spring Factory objects
 
@@ -237,7 +247,7 @@ module show_reference_objects(){
 */
 // Example: Make sample objects
    make_SpringFactory();
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_SpringFactory(){
     if(display_bolt){
         make_bolt(bolt_diameter, bolt_length, bolt_pitch,
@@ -268,9 +278,9 @@ module make_SpringFactory(){
 
 
 
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt()
-/*
+//
     Description:
         Creates Bolt object to act as a mold for the spring shape
 
@@ -287,32 +297,32 @@ module make_SpringFactory(){
 */
 // Example: Make sample object
 //   make_bolt(bolt_diameter, bolt_length, bolt_pitch, bolt_grip_length, bolt_grip_width, bolt_grip_height, bolt_base_diameter);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt(d,l,pitch,
                  grip_length, grip_width, grip_height,
                  base_diameter){
     union(){
         // Base
-        if(VERBOSE) echo("--> Make \"Bolt\" Base");
+        if($VERBOSE) echo("--> Make \"Bolt\" Base");
         make_bolt_base(base_diameter,grip_height);
         // Grip
-        if(VERBOSE) echo("--> Make \"Bolt\" Grip");
+        if($VERBOSE) echo("--> Make \"Bolt\" Grip");
         make_bolt_grip(grip_width,grip_length,grip_height);
         // Threads
-        if(VERBOSE) echo("--> Make \"Bolt\" Threads");
+        if($VERBOSE) echo("--> Make \"Bolt\" Threads");
         translate([0,0,grip_height])
             make_bolt_thread(d, l, pitch);
         // Wire Eyelet
-        if(VERBOSE) echo("--> Make \"Bolt\" Wire Eyelet");
+        if($VERBOSE) echo("--> Make \"Bolt\" Wire Eyelet");
         make_bolt_wire_eyelet(grip_width, grip_height, (grip_height*1.71)-grip_height, base_diameter/2, angle=27, z_rotation=3);
         // Wire Catch
-        if(VERBOSE) echo("--> Make \"Bolt\" Wire Catch");
+        if($VERBOSE) echo("--> Make \"Bolt\" Wire Catch");
         make_bolt_wire_catch(grip_width, grip_height, (grip_height*1.71)-grip_height, base_diameter/2, angle=25.4, z_rotation=-20.83);
     }
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt_base()
-/*
+//
     Description:
         Creates "base" part for inclusion in the larger Bolt object
 
@@ -323,12 +333,12 @@ module make_bolt(d,l,pitch,
 */
 // Example: Make sample object
 //   make_bolt_base(base_diameter,grip_height);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt_base(d, h, cutout_angle=13){
-    if(VERBOSE) echo("----> Begin \"Bolt\" Base Creation");
-    if(VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",d,"**"));
-    if(VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
-    if(VERBOSE) echo(str("**======> Base Cutout Rotation Angle: ",cutout_angle,"**"));
+    if($VERBOSE) echo("----> Begin \"Bolt\" Base Creation");
+    if($VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",d,"**"));
+    if($VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
+    if($VERBOSE) echo(str("**======> Base Cutout Rotation Angle: ",cutout_angle,"**"));
     difference(){
         // Base
         cylinder(h=h,d=d,$fn=360);
@@ -342,9 +352,9 @@ module make_bolt_base(d, h, cutout_angle=13){
         }
     }
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt_grip()
-/*
+//
     Description:
         Creates "grip" part for inclusion in the larger Bolt object
 
@@ -355,18 +365,18 @@ module make_bolt_base(d, h, cutout_angle=13){
 */
 // Example: Make sample object
 //   make_bolt_base(bolt_grip_width, bolt_grip_length, bolt_grip_height);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt_grip(x,y,z){
-    if(VERBOSE) echo("----> Begin \"Bolt\" Grip Creation");
-    if(VERBOSE) echo(str("**======> Grip Width (X): ",x,"**"));
-    if(VERBOSE) echo(str("**======> Grip Length (Y): ",y,"**"));
-    if(VERBOSE) echo(str("**======> Grip Height (Z): ",z,"**"));
+    if($VERBOSE) echo("----> Begin \"Bolt\" Grip Creation");
+    if($VERBOSE) echo(str("**======> Grip Width (X): ",x,"**"));
+    if($VERBOSE) echo(str("**======> Grip Length (Y): ",y,"**"));
+    if($VERBOSE) echo(str("**======> Grip Height (Z): ",z,"**"));
     translate([0,0,((z*.97)/2)+(z*.014)])
         cuboid([x,y,(z*.97)], fillet=1);
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt_thread()
-/*
+//
     Description:
         Creates "thread" part for inclusion in the larger Bolt object
 
@@ -377,18 +387,18 @@ module make_bolt_grip(x,y,z){
 */
 // Example: Make sample object
 //   make_bolt_thread(bolt_diameter, bolt_length, bolt_pitch);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt_thread(d,l,pitch){
-    if(VERBOSE) echo("----> Begin \"Bolt\" Thread Creation");
-    if(VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
-    if(VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
-    if(VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
+    if($VERBOSE) echo("----> Begin \"Bolt\" Thread Creation");
+    if($VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
+    if($VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
+    if($VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
     translate([0,0,l/2])
         threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt_wire_eyelet()
-/*
+//
     Description:
         Creates "wire eyelet" part for inclusion in the larger Bolt object
 
@@ -401,15 +411,15 @@ module make_bolt_thread(d,l,pitch){
 */
 // Example: Make sample object
 //   make_bolt_wire_eyelet(bolt_grip_width, bolt_grip_height, bolt_base_diameter/2);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt_wire_eyelet(width,height,extension,radius, angle=0, z_rotation=0){
     combined_height=height+extension;
-    if(VERBOSE) echo("----> Begin \"Bolt\" Eyelet Creation");
-    if(VERBOSE) echo(str("**======> Eyelet Width (X): ",width,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Height (Z): ",combined_height,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Radius (r): ",radius,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Extrusion Length: ",angle,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Z-Rotation Offset Angle: ",z_rotation,"**"));
+    if($VERBOSE) echo("----> Begin \"Bolt\" Eyelet Creation");
+    if($VERBOSE) echo(str("**======> Eyelet Width (X): ",width,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Height (Z): ",combined_height,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Radius (r): ",radius,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Extrusion Length: ",angle,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Z-Rotation Offset Angle: ",z_rotation,"**"));
     // Wire Eyelet
     rotate([0,0,z_rotation+angle/2]) {       // Rotate Off-Center
         difference(){
@@ -428,9 +438,9 @@ module make_bolt_wire_eyelet(width,height,extension,radius, angle=0, z_rotation=
         }
     }
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_bolt_wire_catch()
-/*
+//
     Description:
         Creates "wire catch" part for inclusion in the larger Bolt object
 
@@ -443,15 +453,15 @@ module make_bolt_wire_eyelet(width,height,extension,radius, angle=0, z_rotation=
 */
 // Example: Make sample object
 //   make_bolt_wire_catch(bolt_grip_width, bolt_grip_height, bolt_base_diameter/2);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0, base_height){
     combined_height=height+extension;
-    if(VERBOSE) echo("----> Begin \"Bolt\" Catch Creation");
-    if(VERBOSE) echo(str("**======> Catch Width (X): ",width,"**"));
-    if(VERBOSE) echo(str("**======> Catch Height (Z): ",combined_height,"**"));
-    if(VERBOSE) echo(str("**======> Catch Radius (r): ",radius,"**"));
-    if(VERBOSE) echo(str("**======> Catch Extrusion Length: ",angle,"**"));
-    if(VERBOSE) echo(str("**======> Catch Z-Rotation Offset Angle: ",z_rotation,"**"));
+    if($VERBOSE) echo("----> Begin \"Bolt\" Catch Creation");
+    if($VERBOSE) echo(str("**======> Catch Width (X): ",width,"**"));
+    if($VERBOSE) echo(str("**======> Catch Height (Z): ",combined_height,"**"));
+    if($VERBOSE) echo(str("**======> Catch Radius (r): ",radius,"**"));
+    if($VERBOSE) echo(str("**======> Catch Extrusion Length: ",angle,"**"));
+    if($VERBOSE) echo(str("**======> Catch Z-Rotation Offset Angle: ",z_rotation,"**"));
     // Wire Catch
     rotate([0,0,z_rotation]) {     // Rotate Off-Center
         difference(){
@@ -490,9 +500,9 @@ module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0
 
 
 
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_screw()
-/*
+//
     Description:
         Creates Screw object to manipulate wire around mold for the spring shape
 
@@ -509,7 +519,7 @@ module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0
 */
 // Example: Make sample object
 //   make_screw(screw_diameter, screw_grip_height, screw_pitch, screw_grip_length, screw_grip_width, screw_grip_height, screw_base_diameter);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_screw(d,l,pitch,
                   grip_length,grip_width,grip_height,
                   base_diameter){
@@ -518,26 +528,26 @@ module make_screw(d,l,pitch,
             union(){
                 // Base
                 h=l*1.1775;
-                if(VERBOSE) echo("--> Make \"Screw\" Base");
-                if(VERBOSE) echo("----> Begin \"Screw\" Base Creation");
-                if(VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",base_diameter,"**"));
-                if(VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
+                if($VERBOSE) echo("--> Make \"Screw\" Base");
+                if($VERBOSE) echo("----> Begin \"Screw\" Base Creation");
+                if($VERBOSE) echo(str("**======> Base Diameter (D=X/Y): ",base_diameter,"**"));
+                if($VERBOSE) echo(str("**======> Base Height (Z): ",h,"**"));
                 translate([0,0,h/2]) cylinder(h=h,d=base_diameter,center=true,$fn=360);
                 // Grip
-                if(VERBOSE) echo("--> Make \"Screw\" Grip");
-                if(VERBOSE) echo("----> Begin \"Screw\" Grip Creation");
-                if(VERBOSE) echo(str("**======> Grip Width (X): ",grip_width,"**"));
-                if(VERBOSE) echo(str("**======> Grip Length (Y): ",grip_length,"**"));
-                if(VERBOSE) echo(str("**======> Grip Height (Z): ",grip_height,"**"));
+                if($VERBOSE) echo("--> Make \"Screw\" Grip");
+                if($VERBOSE) echo("----> Begin \"Screw\" Grip Creation");
+                if($VERBOSE) echo(str("**======> Grip Width (X): ",grip_width,"**"));
+                if($VERBOSE) echo(str("**======> Grip Length (Y): ",grip_length,"**"));
+                if($VERBOSE) echo(str("**======> Grip Height (Z): ",grip_height,"**"));
                 translate([0,0,((grip_height*.97)/2)++(grip_height*.0125)])
                     cuboid([grip_width,grip_length,(grip_height*.97)], fillet=1);
             }
             // Threads
-            if(VERBOSE) echo("--> Make \"Screw\" Threads");
-            if(VERBOSE) echo("----> Begin \"Screw\" Thread Creation");
-            if(VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
-            if(VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
-            if(VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
+            if($VERBOSE) echo("--> Make \"Screw\" Threads");
+            if($VERBOSE) echo("----> Begin \"Screw\" Thread Creation");
+            if($VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
+            if($VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
+            if($VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
             if(display_cutouts){
                 #threaded_rod(d=d, l=l*2.5, pitch=pitch, $fa=1, $fs=1);
             } else {
@@ -545,13 +555,13 @@ module make_screw(d,l,pitch,
             }
         }
         // Wire Eyelet
-        if(VERBOSE) echo("--> Make \"Screw\" Wire Eyelet");
+        if($VERBOSE) echo("--> Make \"Screw\" Wire Eyelet");
         make_screw_wire_eyelet(grip_width*1.0276, grip_height*1.8115, base_diameter/2, angle=100, z_rotation=-98);
     }
 }
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_screw_wire_eyelet()
-/*
+//
     Description:
         Creates "wire eyelet" part for inclusion in the larger Screw object
 
@@ -564,14 +574,14 @@ module make_screw(d,l,pitch,
 */
 // Example: Make sample object
 //   make_screw_wire_eyelet(screw_grip_width, screw_grip_height, screw_base_diameter/2);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
-    if(VERBOSE) echo("----> Begin \"Screw\" Eyelet Creation");
-    if(VERBOSE) echo(str("**======> Eyelet Width (X): ",width,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Height (Z): ",height,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Radius (r): ",radius,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Extrusion Length: ",angle,"**"));
-    if(VERBOSE) echo(str("**======> Eyelet Z-Rotation Offset Angle: ",z_rotation,"**"));
+    if($VERBOSE) echo("----> Begin \"Screw\" Eyelet Creation");
+    if($VERBOSE) echo(str("**======> Eyelet Width (X): ",width,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Height (Z): ",height,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Radius (r): ",radius,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Extrusion Length: ",angle,"**"));
+    if($VERBOSE) echo(str("**======> Eyelet Z-Rotation Offset Angle: ",z_rotation,"**"));
     // Wire Eyelet
     rotate([0,0,z_rotation+angle/2]) {       // Rotate Off-Center
         difference(){
@@ -602,9 +612,9 @@ module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
 
 
 
-//////////////////////////////////////////////////////////////////////
+/*///////////////////////////////////////////////////////
 // Module: make_cap()
-/*
+//
     Description:
         Creates Cap object to create a flat surface on the end of the spring
 
@@ -617,15 +627,15 @@ module make_screw_wire_eyelet(width,height,radius, angle=0, z_rotation=0){
 */
 // Example: Make sample object
 //   make_cap(cap_diameter, cap_rotations, cap_pitch);
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////*/
 module make_cap(d,l,pitch){
     base=d*1.124;
     // Threads
-    if(VERBOSE) echo("--> Make \"Cap\" Threads");
-    if(VERBOSE) echo("----> Begin \"Cap\" Thread Creation");
-    if(VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
-    if(VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
-    if(VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
+    if($VERBOSE) echo("--> Make \"Cap\" Threads");
+    if($VERBOSE) echo("----> Begin \"Cap\" Thread Creation");
+    if($VERBOSE) echo(str("**======> Thread Diameter (X/Y): ",d,"**"));
+    if($VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
+    if($VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
     translate([0,0,l/2]) {
         difference(){
             union(){
