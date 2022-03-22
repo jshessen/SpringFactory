@@ -1,0 +1,5 @@
+# Ignore the Eclipse Project Files
+.project
+
+# Keep .gitkeep enabled directories (empty)
+!.gitkeep
