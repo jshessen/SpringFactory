@@ -16,27 +16,24 @@
 /*&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 &&  GNU GPLv3
 &&
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <https://www.gnu.org/licenses/>.
 &&
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
 
 
 
 /*?????????????????????????????????????????????????????????????????
-Springs --> Leaf Springs
-        --> Helical Springs
-                --> Compression Spring aka Open Coil Spring
-                --> Tension Spring aka Closed Coil Spring (Extension)
-                --> Torsion Spring
-                --> Spiral Spring
-
-What is a Compression Spring?
-Compression springs are helically coiled wires wound one on top of the other to absorb shock or maintain a force between two surfaces. Therefore containing or releasing energy when a load is applied.
-*/
+??
 /*???????????????????????????????????????????????????????
 ?? Section: Customizer
 ??
@@ -159,10 +156,27 @@ module spring_dimensions(d,Do,L0,Na){
         prefix,"Music Wire ASTM A228");
     echo(dimensions);
     
-    
+    echo( (-1)?"negative":false);
     E   = 0;
     G   = 0;
+    //Kc=Kb/Ks = (2*C*(4*C +2))/((4*C-3)*(2*C+1));
     //Na = (Gd)/((8C^3k)(1+0.5/C^2))
+    //Na = Gd^4y_max/(8D^3Fmax)
+    //(Lo)cr=2.63*D/greek(a)
+    // greek(a) = 2.63*D/Lo
+    // greek(a) = end-condition constant
+    // ycr = critical deflection
+    // ys = Fmax/k*
+    // L0=Ls+ys
+    // D=C*d
+    //Over a rod
+    // D=drod+d+allow
+    //In a hole
+    // D=dhole-d-allow
+    // Free
+    //      As Wound    Ssy=A/d^m
+    //      Set Removed Ssy=0.65*A/d^m
+    //fom=-(relative cost)(Ypi^2*d%2*Nt*D)/4
     // (Kd)                 = Shear stress correction factor
     // (Sut)                = Minimum tensile strength of material (Wire Strength)
     // (A)                  = A kpsi/Mpa
@@ -177,9 +191,9 @@ module spring_dimensions(d,Do,L0,Na){
 
     // (Ssy)                                = Torsional yeild strength (Wire Shear Strength)
     // 0.35 Sut <= Sy <= 0.52Sut
-    // Ssy = Tall = .45Sut (cold-drawn carbon steel)
-    // Ssy = Tall = .50Sut (hardend and tempered carbon and low-alloy steel)
-    // Ssy = Tall = .35Sut (austenitic stainless steel and nonferrous alloys)
+    // Ssy = Tall = .45Sut (cold-drawn carbon steel) - music wire               After set 60-70
+    // Ssy = Tall = .50Sut (hardend and tempered carbon and low-alloy steel)                65-75
+    // Ssy = Tall = .35Sut (austenitic stainless steel and nonferrous alloys) - austenitic stainless nonferrous alloys 55-65
     Ssy=0.50*Sut;
 
     // (F)                  = Static Load corresponding to the yield strength
@@ -236,14 +250,64 @@ FINAL ANSWER
 12.7323954473516 Pascal <-- Shear Stress
 (Calculation completed in 00.016 seconds)
 */
-module spring_designer(Fo,Lo, Fi,Li){
+module compression_spring_designer(Fo,Lo, Fi,Li){
+
+/*
+Springs --> Leaf Springs
+        --> Helical Springs
+                --> Compression Spring aka Open Coil Spring
+                --> Tension Spring aka Closed Coil Spring (Extension)
+                --> Torsion Spring
+                --> Spiral Spring
+
+What is a Compression Spring?
+Compression springs are helically coiled wires wound one on top of the other to absorb shock or maintain a force between two surfaces.
+Therefore containing or releasing energy when a load is applied.
+*/
+
+
+/*Limit the design solution space by setting some practical limits
+ Preferred range for spring index
+    4 <= C <=12
+ Preferred range for number of active coils
+    3 <= Na <=15
+    Lx <= 1
+        L0<= 4
+        L0_cr Buckling Criteria
+        ns >= 1.20 Factor of Safety
+        figure of merit
+        
+        
+        75% of the force deflection curve
+        between F=0 and F=Fs
+        Fmax<= 7/8*Fs
+        Fractional Overrun to closure as curly
+        Fs=(1+curly)Fmax
+        Fs=(1+curly)(7/8)*Fs
+        curly = 1/7 = 0.143 curly >= 0.15
+        
+        y=F/k
+        d
+        D
+        C
+        Od
+        Na
+        Ls
+        Lo
+        (Lo)cr
+        (ns) = Ssy/Ts
+        fom
+
+        
+        
+*/
     // If there are no constraints on spring diameter
 
     // Fo    = Force at Length Lo
     // Fi    = Force at Length Li
     
     
-
+//Peter R.N. Childs, in Mechanical Design Engineering Handbook, 2014
 //    1.    Select a material and identify its shear modulus of elasticity G and an estimate of the design stress.
 //    2.    Calculate a value for the wire diameter based on the spring material properties and assuming approximate values for C and Kw. Typical estimates for C and Kw of 7 and 1.2, respectively, are generally suitable.
 //    d=sqrt((8*Kw*Fo*C)/(PI*τmax));
@@ -284,6 +348,26 @@ module spring_designer(Fo,Lo, Fi,Li){
 //    13.    Check whether the spring is likely to buckle.
 //    14.    Specify the spring dimensions.
 }
+/*///////////////////////////////////////////////////////
+// Module: line_up()
+//
+    Description:
+        Translates the "child" objects along the [x, y, z] plane
+
+    Parameter(s):
+        vector  ([x,y,z] = [0,0,0])
+            vector[0]    = X-axis
+            vector[1]    = Y-axis
+            vector[2]    = Z-axis
+//
+///////////////////////////////////////////////////////*/
+module line_up(vector) {
+    x=(!is_undef(vector[0])) ? vector[0] : 0;
+    y=(!is_undef(vector[1])) ? vector[1] : 0;
+    z=(!is_undef(vector[2])) ? vector[2] : 0;
+    for (i = [0 : 1 : $children-1])
+        translate([x*i, y*i, z*i ]) children(i);
+}
 /*
 /////////////////////////////////////////////////////////////////*/
 
@@ -314,11 +398,12 @@ module spring_designer(Fo,Lo, Fi,Li){
 function inside_diameter(Do,d,  D) = (
     let(Di=(!is_undef(D)  && !is_undef(d)) ? D-d : Do-2*d)
     (!$VERBOSE)
-        ? Di
-        : let(reference = str("Di"))
-          let(formula   = (!is_undef(D) && !is_undef(d)) ? str("D-d")   : str("Do-2*d"))
-          let(equation  = (!is_undef(D) && !is_undef(d)) ? str(D,"-",d) : str(Do,"-",2,"*",d))
-          echo_verbose(reference,formula,equation,Di)
+    ?   Di
+    :   let(reference = str("Di"))
+        let(formula   = (!is_undef(D) && !is_undef(d)) ? str("D-d")   : str("Do-2*d"))
+        let(equation  = (!is_undef(D) && !is_undef(d)) ? str(D,"-",d) : str(Do,"-",2,"*",d))
+        echo(verbose(reference,formula,equation,Di))
+        Di
 );
 function Di(Do,d,  D) = inside_diameter(Do,d,  D);
 /*#######################################################
@@ -341,11 +426,12 @@ function Di(Do,d,  D) = inside_diameter(Do,d,  D);
 function outside_diameter(Di,d,  D) = (
     let(Do=(!is_undef(D)  && !is_undef(d)) ? D+d : Di+2*d)
     (!$VERBOSE)
-        ? Do
-        : let(reference = str("Do"))
-          let(formula   = (!is_undef(D) && !is_undef(d)) ? str("D+d")   : str("Di+2*D"))
-          let(equation  = (!is_undef(D) && !is_undef(d)) ? str(D,"+",d) : str(Di,"+",2,"*",D))
-          echo_verbose(reference,formula,equation,Do)
+    ?   Do
+    :   let(reference = str("Do"))
+        let(formula   = (!is_undef(D) && !is_undef(d)) ? str("D+d")   : str("Di+2*d"))
+        let(equation  = (!is_undef(D) && !is_undef(d)) ? str(D,"+",d) : str(Di,"+",2,"*",d))
+        echo(verbose(reference,formula,equation,Do))
+        Do
 );
 function Do(Di,d,  D) = outside_diameter(Di,d,  D);
 /*#######################################################
@@ -365,11 +451,12 @@ function Do(Di,d,  D) = outside_diameter(Di,d,  D);
 function diameter(Do,Di) = (
     let(d=(Do-Di)/2)
     (!$VERBOSE)
-        ? d
-        : let(reference = "d")
-          let(formula   = str("(Do-Di)/2"))
-          let(equation  = str("(",Do,"-",Di,")","/",2))
-          echo_verbose(reference,formula,equation,d)
+    ?   d
+    :   let(reference = "d")
+        let(formula   = str("(Do-Di)/2"))
+        let(equation  = str("(",Do,"-",Di,")","/",2))
+        echo(verbose(reference,formula,equation,d))
+        d
 );
 function d(Do,Di) = diameter(Do,Di);
 /*#######################################################
@@ -406,19 +493,20 @@ function mean_diameter(Do,d,  Di,  C) = (
         (!is_undef(Di) && !is_undef(d))  ? Di+d             :
                                            Do-d)
     (!$VERBOSE)
-        ? D
-        : let(reference = "D")
-          let(formula   = 
+    ?   D
+    :   let(reference = "D")
+        let(formula   = 
             (!is_undef(Do) && !is_undef(Di)) ? str("(Do+Di)/2") :
             (!is_undef(C)  && !is_undef(d))  ? str("C/d")     :
             (!is_undef(Di) && !is_undef(d))  ? str("Di+d")
                                              : str("Do-d"))
-          let(equation  = 
+        let(equation  = 
             (!is_undef(Do) && !is_undef(Di)) ? str("(",Do,"+",Di,")","/",2) :
             (!is_undef(C)  && !is_undef(d))  ? str(C,"/",d)         :
             (!is_undef(Di) && !is_undef(d))  ? str(Di,"+",d)
                                              : str(Do,"-",d))
-          echo_verbose(reference,formula,equation,D)
+        echo(verbose(reference,formula,equation,D))
+        D
 );
 function D(Do,d,  Di,  C) = mean_diameter(Do,d,  Di,  C);
 /*#######################################################
@@ -436,11 +524,12 @@ function D(Do,d,  Di,  C) = mean_diameter(Do,d,  Di,  C);
 function mean_radius(D) = (
     let(R=D/2)
     (!$VERBOSE)
-        ? R
-        : let(reference = "R")
-          let(formula   = str("D/2"))
-          let(equation  = str(D,"/",2))
-          echo_verbose(reference,formula,equation,R)
+    ?   R
+    :   let(reference = "R")
+        let(formula   = str("D/2"))
+        let(equation  = str(D,"/",2))
+        echo(verbose(reference,formula,equation,R))
+        R
 );
 function R(D) = mean_radius(D);
 /*#######################################################
@@ -459,11 +548,12 @@ function R(D) = mean_radius(D);
 function radius(d) = (
     let(r=d/2)
     (!$VERBOSE)
-        ? r
-        : let(reference = "r")
-          let(formula   = str("d/2"))
-          let(equation  = str(d,"/",2))
-          echo_verbose(reference,formula,equation,r)
+    ?   r
+    :   let(reference = "r")
+        let(formula   = str("d/2"))
+        let(equation  = str(d,"/",2))
+        echo(verbose(reference,formula,equation,r))
+        r
 );
 function r(d) = radius(d);
 /*#######################################################
@@ -485,11 +575,12 @@ function r(d) = radius(d);
 function spring_index(D,d) = (
     let(C=D/d)
     (!$VERBOSE)
-        ? C
-        : let(reference = "C")
-          let(formula   = str("D/d"))
-          let(equation  = str(D,"/",d))
-          echo_verbose(reference,formula,equation,C)
+    ?   C
+    :   let(reference = "C")
+        let(formula   = str("D/d"))
+        let(equation  = str(D,"/",d))
+        echo(verbose(reference,formula,equation,C))
+        C
 );
 function C(D,d) = spring_index(D,d);
 /*#######################################################
@@ -519,11 +610,12 @@ function end_coils(Form,  Open,Closed, Ground) = (
            (Form == "C") ? 1
                          : 2)
     (!$VERBOSE)
-        ? Ne
-        : let(reference = "Ne")
-          let(formula   = str("#"))
-          let(equation  = str(Ne))
-          echo_verbose(reference,formula,equation,Ne)
+    ?   Ne
+    :   let(reference = "Ne")
+        let(formula   = str("#"))
+        let(equation  = str(Ne))
+        echo(verbose(reference,formula,equation,Ne))
+        Ne
 );
 function Ne(Form,  Open,Closed, Ground) = end_coils(Form,  Open,Closed, Ground);
 /*#######################################################
@@ -557,11 +649,12 @@ function total_coils(Na,Ne,  Form,  Open,Closed, Ground) = (
     let(Ne=(!is_undef(Ne))      ? Ne        : Ne(Form=Form))
     let(Nt=Na+Ne)
     (!$VERBOSE)
-        ? Nt
-        : let(reference = "Nt")
-          let(formula   = str("Na+Ne"))
-          let(equation  = str(Na,"+",Ne))
-          echo_verbose(reference,formula,equation,Nt)
+    ?   Nt
+    :   let(reference = "Nt")
+        let(formula   = str("Na+Ne"))
+        let(equation  = str(Na,"+",Ne))
+        echo(verbose(reference,formula,equation,Nt))
+        Nt
 );
 function Nt(Na,Ne,  Form,  Open,Closed, Ground) = total_coils(Na,Ne,  Form,  Open,Closed, Ground);
 /*#######################################################
@@ -604,24 +697,25 @@ function pitch(L0,d,Na,  Form,  Open,Closed, Ground) = (
            (Form == "C")        ? L0/(Na+1)
                                 :(L0-2*d)/Na)
     (!$VERBOSE)
-        ? p
-        : let(reference = "p")
-          let(arguments=[
+    ?   p
+    :   let(reference = "p")
+        let(arguments=[
             ((!is_undef(Form))  ? str("Form                         : ",Form) : ""),
             ((!is_undef(Open))  ? str("Open                         : ",Open) : ""),
             ((!is_undef(Ground))? str("Ground                       : ",Ground) : "")
-          ])
-          let(formula   = 
+        ])
+        let(formula   = 
             (Form == "A")       ? str("(L0-d)/Na") :
             (Form == "B")       ? str("(L0-3*d)/Na") :
             (Form == "C")       ? str("L0/(Na+1)")
                                 : str("(L0-2*d)/Na)"))
-          let(equation  = 
+        let(equation  = 
             (Form == "A")       ? str("(",L0,"-",d,")/",Na) :
             (Form == "B")       ? str("(",L0,"-",3,"*",d,")/",Na) :
             (Form == "C")       ? str("",L0,"/(",Na,"+",1,")")
                                 : str("(",L0,"-",2,"*",d,")/",Na,")"))
-          echo_verbose(reference,formula,equation,p)
+        echo(verbose(reference,formula,equation,p))
+        p
 );
 function p(L0,d,Na,  Form,  Open,Closed, Ground) = pitch(L0,d,Na,  Form,  Open,Closed, Ground);
 /*#######################################################
@@ -640,12 +734,13 @@ function p(L0,d,Na,  Form,  Open,Closed, Ground) = pitch(L0,d,Na,  Form,  Open,C
 function rise_angle(p,D) = (
     let(a=atan(p/(PI*D)))
     (!$VERBOSE)
-        ? a
-        : let(reference = "a")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = str("atan(p/(",pi,"*D)"))
-          let(equation  = str("atan(",p,"/","(",pi,"*",D,")"))
-          echo_verbose(reference,formula,equation,a)
+    ?   a
+    :   let(reference = "a")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = str("atan(p/(",pi,"*D)"))
+        let(equation  = str("atan(",p,"/","(",pi,"*",D,")"))
+        echo(verbose(reference,formula,equation,a))
+        a
 );
 function a(p,D) = rise_angle(p,D);
 /*#######################################################
@@ -684,25 +779,26 @@ function free_length(p,d,Na,  Form,  Open,Closed, Ground) = (
            (Form == "C")        ? P*(Na+1)
                                 : P*Na+2*d)
     (!$VERBOSE)
-        ? L0
-        : let(reference = "L0")
-          let(arguments=[
+    ?   L0
+    :   let(reference = "L0")
+        let(arguments=[
             ((!is_undef(Form)) ? str("Form                         : ",Form) : "" ),
             ((!is_undef(Open)) ? str("Open                         : ",Open) : "" ),
             ((!is_undef(Ground))? str("Ground                       : ",Ground) : "" )
-          ])
-          let(formula   = 
+        ])
+        let(formula   = 
             (Form == "A")       ? str("p*Na+d") :
             (Form == "B")       ? str("p*Na+3*d") :
             (Form == "C")       ? str("p*(Na+1)")
                                 : str("p*Na+2*d"))
-          let(equation  = 
+        let(equation  = 
             (Form == "A")       ? str(p,"*",Na,"+",d) :
             (Form == "B")       ? str(p,"*",Na,"+",3,"*",d) :
             (Form == "C")       ? str(p,"*(",Na,"+",d,")")
                                 : str(p,"*",Na,"+",2,"*",d))
-          echo_verbose(reference,formula,equation,L0)
-          );
+        echo(verbose(reference,formula,equation,L0))
+        L0
+);
 function L0(p,d,Na,  Form,  Open,Closed, Ground) = free_length(p,d,Na,  Form,  Open,Closed, Ground);
 /*#######################################################
 ## Function: solid_length()
@@ -729,15 +825,17 @@ function solid_length(d,Nt,  Form,  Open,Closed, Ground) = (
                (!is_undef(Form) && (Form == "C" || Form == "D")) ? 1 : 0)
     let(Ls=(Ground) ? d*Nt : d*(Nt+1))
     (!$VERBOSE)
-        ? Ls
-        : let(reference = "Ls")
-          let(arguments=[
+    ?   Ls
+    :   let(reference = "Ls")
+        let(arguments=[
             ((!is_undef(Form))  ? str("Form                         : ",Form) : "" ),
             ((!is_undef(Open))  ? str("Open                         : ",Open) : "" ),
-            ((!is_undef(Ground))? str("Ground                       : ",Ground) : "" )])
-          let(formula   = (Ground)  ? str("d*Nt")   : str("d*(Nt+1)"))
-          let(equation  = (Ground)  ? str(d,"*",Nt) : str(d,"*(",Nt,"+",1,")"))
-          echo_verbose(reference,formula,equation,Ls)
+            ((!is_undef(Ground))? str("Ground                       : ",Ground) : "" )
+        ])
+        let(formula   = (Ground)  ? str("d*Nt")   : str("d*(Nt+1)"))
+        let(equation  = (Ground)  ? str(d,"*",Nt) : str(d,"*(",Nt,"+",1,")"))
+        echo(verbose(reference,formula,equation,Ls))
+        Ls
 );
 function Ls(d,Nt,  Form,  Open,Closed, Ground) = solid_length(d,Nt,  Form,  Open,Closed, Ground);
 /*#######################################################
@@ -765,15 +863,16 @@ function Ls(d,Nt,  Form,  Open,Closed, Ground) = solid_length(d,Nt,  Form,  Open
 function direct_shear_factor(C,  D,d) = (
     let(Kd=(!is_undef(D) && !is_undef(d)) ? 1+(d/2*D) : 1+(1/(2*C)))
     (!$VERBOSE)
-        ? Kd
-        : let(reference = "Kd")
-          let(formula   = 
+    ?   Kd
+    :   let(reference = "Kd")
+        let(formula   = 
             (!is_undef(D)  && !is_undef(d))  ? str("1+(d/2*D)")
                                              : str("1+(1/(2*C)"))
-          let(equation  =
+        let(equation  =
             (!is_undef(D)  && !is_undef(d))  ? str(1,"+","(",d,"/",2,"*",D,")")
                                              : str(1,"+","(",1,"/","(",2,"*",C,")"))
-          echo_verbose(reference,formula,equation,Kd)
+        echo(verbose(reference,formula,equation,Kd))
+        Kd
 );
 function Kd(C,  D,d) = direct_shear_factor(C,  D,d);
 /*#######################################################
@@ -802,21 +901,23 @@ function Kd(C,  D,d) = direct_shear_factor(C,  D,d);
 function wahl_factor(C)                 = (
     let(Kw=((4*C-1)/(4*C-4))+(0.615)/C)
     (!$VERBOSE)
-        ? Kw
-        : let(reference = "Kw")
-          let(formula   = str("((4*C -1)/(4*C-4)) + (0.615)/C)"))
-          let(equation  = str("(","(",4,"*",C,"-",1,")","/","(",4,"*",C,"-",4,")",")","+","(",0.615,")","/",C))
-          echo_verbose(reference,formula,equation,Kw)
+    ?   Kw
+    :   let(reference = "Kw")
+        let(formula   = str("((4*C -1)/(4*C-4)) + (0.615)/C)"))
+        let(equation  = str("(","(",4,"*",C,"-",1,")","/","(",4,"*",C,"-",4,")",")","+","(",0.615,")","/",C))
+        echo(verbose(reference,formula,equation,Kw))
+        Kw
 );
 function Kw(C) = wahl_factor(C);
 function bergstraesser_factor(C)        = (
     let(Kb=(C+0.5)/(C-0.75))
     (!$VERBOSE)
-        ? Kb
-        : let(reference = "Kb")
-          let(formula   = str("(C+0.5)/(C-0.75)"))
-          let(equation  = str("(",C,"+",0.5,")","/","(",C,"-",0.75,")"))
-          echo_verbose(reference,formula,equation,Kb)
+    ?   Kb
+    :   let(reference = "Kb")
+        let(formula   = str("(C+0.5)/(C-0.75)"))
+        let(equation  = str("(",C,"+",0.5,")","/","(",C,"-",0.75,")"))
+        echo(verbose(reference,formula,equation,Kb))
+        Kb
 );
 function Kb(C) = bergstraesser_factor(C);
 //Acceptable
@@ -863,17 +964,18 @@ function spring_rate(d,G,C,Na,  D,  F,x) = (
         (!is_undef(D))                   ? (G*pow(d,4))/(8*pow(D,3)*Na)
                                          : (d*G)/(8*pow(C,3)*Na))
     (!$VERBOSE)
-        ? k
-        : let(reference = "k")
-          let(formula   = 
+    ?   k
+    :   let(reference = "k")
+        let(formula   = 
             (!is_undef(F)   && !is_undef(x)) ? str("F/x")                   :
             (!is_undef(D))                   ? str("(G*d^4))/(8*D^3)*Na)")
                                              : str("(d*G)/(8*C^3)*Na)"))
-          let(equation  =
+        let(equation  =
             (!is_undef(F)   && !is_undef(x)) ? str(F,"/",x)                   :
             (!is_undef(D))                   ? str("(",G,"*",d,"^",4,")",")","/","(",8,"*",D,"^",3,"*",Na,")")
                                              : str("(",d,"*",G,")","/","(",8,"*",C,"^",3,")","*",Na,")"))
-          echo_verbose(reference,formula,equation,k)
+        echo(verbose(reference,formula,equation,k))
+        k
 );
 function k(d,G,C,Na,  D,  F,x) = spring_rate(d,G,C,Na,  D,  F,x);
 /*#######################################################
@@ -907,12 +1009,13 @@ function F(k,x) = hooke_law(k,x);
 function polar_moment(d) = (
     let(Iz=(PI*pow(d,4))/32)
     (!$VERBOSE)
-        ? Iz
-        : let(reference = "Iz")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = str("(",pi,"*d^4)/32"))
-          let(equation  = str("(",pi,"*",d,"^",4,")","/",32))
-          echo_verbose(reference,formula,equation,Iz)
+    ?   Iz
+    :   let(reference = "Iz")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = str("(",pi,"*d^4)/32"))
+        let(equation  = str("(",pi,"*",d,"^",4,")","/",32))
+        echo(verbose(reference,formula,equation,Iz))
+        Iz
 );
 function Iz(d) = polar_moment(d);
 /*#######################################################
@@ -943,16 +1046,17 @@ function polar_section_modulus(d,  c,r,  Iz) = (
           (!is_undef(c)) ? c*2 : d)
     let(Zp=(!is_undef(Iz)) ? Iz/(d/2) : (PI*pow(d,3))/16)
     (!$VERBOSE)
-        ? Zp
-        : let(reference = "Zp")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = 
+    ?   Zp
+    :   let(reference = "Zp")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = 
             (!is_undef(Iz)) ? str("Iz/(d/2)")
                             : str("(",pi,"*d^3)/16"))
-          let(equation  =
+        let(equation  =
             (!is_undef(Iz)) ? str(Iz,"/","(",d,"/",2,")")
                             : str("(",pi,"*",d,"^",3,")","/",16))
-          echo_verbose(reference,formula,equation,Zp)
+        echo(verbose(reference,formula,equation,Zp))
+        Zp
 );
 function Zp(d,  c,r,  Iz) = polar_section_modulus(d,  c,r,  Iz);
 /*#######################################################
@@ -995,16 +1099,17 @@ function max_torsional_shear(F,D,d,  T,c,r, Iz) = (
           (!is_undef(c)) ? c   : r)
     let(Tt_max=(!is_undef(Iz)) ? (T*r)/Iz  : (8*F*D)/(PI*pow(d,3)))
     (!$VERBOSE)
-        ? Tt_max
-        : let(reference = "Tt_max")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = 
+    ?   Tt_max
+    :   let(reference = "Tt_max")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = 
             (!is_undef(Iz)) ? str("(T*r)/Iz")
                             : str("(8*F*D)/(",pi,"*d^3)"))
-          let(equation  =
+        let(equation  =
             (!is_undef(Iz)) ? str(T,"*",r,")","/",Iz)
                             : str("(",8,"*",F,"*",D,")","/","(",pi,"*",d,"^",3,")"))
-          echo_verbose(reference,formula,equation,Tt_max)
+        echo(verbose(reference,formula,equation,Tt_max))
+        Tt_max
 );
 function Tt_max(F,D,d,  T,c,r, Iz) = max_torsional_shear(F,D,d,  T,c,r, Iz);
 /*#######################################################
@@ -1029,16 +1134,17 @@ function Tt_max(F,D,d,  T,c,r, Iz) = max_torsional_shear(F,D,d,  T,c,r, Iz);
 function max_transverse_shear(F,d,  A) = (
     let(Td_max=(!is_undef(F) && !is_undef(A)) ? F/A : (4*F)/(PI*pow(d,2)))
     (!$VERBOSE)
-        ? Tt_max
-        : let(reference = "Td_max")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = 
+    ?   Tt_max
+    :   let(reference = "Td_max")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = 
             (!is_undef(F) && !is_undef(A)) ? str("F/A")
                                            : str("(4*F)/(",pi,"*d^2)"))
-          let(equation  =
+        let(equation  =
             (!is_undef(F) && !is_undef(A)) ? str(F,"/",A)
                                            : str("(",4,"*",F,")","/","(",pi,"*",d,"^",2,")"))
-          echo_verbose(reference,formula,equation,Td_max)
+        echo(verbose(reference,formula,equation,Td_max))
+        Td_max
 );
 function Td_max(F,d,  A) = max_transverse_shear(F,d,  A);
 /*#######################################################
@@ -1076,16 +1182,17 @@ function Td_max(F,d,  A) = max_transverse_shear(F,d,  A);
 function max_shear_stress(F,D,d,K,  Tt_max,Td_max) = (
     let(T_max=(!is_undef(Tt_max) && !is_undef(Td_max)) ? K*(Tt_max+Td_max) : K*(8*F*D)/(PI*pow(d,3)))
     (!$VERBOSE)
-        ? T_max
-        : let(reference = "T_max")
-          let(pi=get_symbol("PI",symbols))
-          let(formula   = 
+    ?   T_max
+    :   let(reference = "T_max")
+        let(pi=get_symbol("PI",symbols))
+        let(formula   = 
             (!is_undef(Tt_max) && !is_undef(Td_max)) ? str("K*(Tt_max+Td_max)")
                                                      : str("K*(8*F*D)/(",pi,"*d^3)"))
-          let(equation  =
+        let(equation  =
             (!is_undef(Tt_max) && !is_undef(Td_max)) ? str(K,"*","(",Tt_max,"+",Td_max,")")
                                                      : str(K,"*","(",8,"*",F,"*",D,")","/","(",pi,"*",d,"^",3,")"))
-          echo_verbose(reference,formula,equation,T_max)
+        echo(verbose(reference,formula,equation,T_max))
+        T_max
 );
 function T_max(F,D,d,K,  Tt_max,Td_max) = max_shear_stress(F,D,d,K,  Tt_max,Td_max);
 /*#######################################################
@@ -1106,11 +1213,12 @@ function T_max(F,D,d,K,  Tt_max,Td_max) = max_shear_stress(F,D,d,K,  Tt_max,Td_m
 function shear_modulus(E,v) = (
     let(G=E/(2*(1+v)))
     (!$VERBOSE)
-        ? G
-        : let(reference = "G")
-          let(formula   = str("E/(2*(1+v))"))
-          let(equation  = str(E,"/","(",2,"*","(",1,"+",v,")",")"))
-          echo_verbose(reference,formula,equation,G)
+    ?   G
+    :   let(reference = "G")
+        let(formula   = str("E/(2*(1+v))"))
+        let(equation  = str(E,"/","(",2,"*","(",1,"+",v,")",")"))
+        echo(verbose(reference,formula,equation,G))
+        G
 );
 function G(E,v) = shear_modulus(E,v);
 /*#######################################################
@@ -1129,11 +1237,12 @@ function G(E,v) = shear_modulus(E,v);
 function tension_modulus(G,v) = (
     let(E=G*(2*(1+v)))
     (!$VERBOSE)
-        ? E
-        : let(reference = "E")
-          let(formula   = str("G*(2*(1+v))"))
-          let(equation  = str(G,"*","(",2,"*","(",1,"+",v,")",")"))
-          echo_verbose(reference,formula,equation,E)
+    ?   E
+    :   let(reference = "E")
+        let(formula   = str("G*(2*(1+v))"))
+        let(equation  = str(G,"*","(",2,"*","(",1,"+",v,")",")"))
+        echo(verbose(reference,formula,equation,E))
+        E
 );
 function E(G,v) = tension_modulus(G,v);
 /*#######################################################
@@ -1152,11 +1261,12 @@ function E(G,v) = tension_modulus(G,v);
 function poisson_ratio(E,G) = (
     let(v=(E/(2*G))-1)
     (!$VERBOSE)
-        ? v
-        : let(reference = "v")
-          let(formula   = str("(E/(2*G))-1"))
-          let(equation  = str("(",E,"/","(",2,"*",G,")",")","-",1))
-          echo_verbose(reference,formula,equation,v)
+    ?   v
+    :   let(reference = "v")
+        let(formula   = str("(E/(2*G))-1"))
+        let(equation  = str("(",E,"/","(",2,"*",G,")",")","-",1))
+        echo(verbose(reference,formula,equation,v))
+        v
 );
 function v(E,G) = poisson_ratio(E,G);
 /*
@@ -1210,7 +1320,9 @@ function A(r,  d) = area_circle(r,  d);
 #######################################################*/
 function torque(r,F,a,  d) = (
     let(a=(!is_undef(a))    ? sin(a) : 1)
-    (!is_undef(d))          ? (d/2)*F*a : r*F*a
+    (!is_undef(d))
+    ?   (d/2)*F*a
+    :   r*F*a
 );
 function T(r,F,a,  d) = torque(r,F,a,  d);
 /*#######################################################
@@ -1230,10 +1342,12 @@ function T(r,F,a,  d) = torque(r,F,a,  d);
 ##  echo(round_float([5.356,7.265626,4.97987979],4));
 #######################################################*/
 function round_float(number,num_digits,  i,v=[]) = (
-    (!is_list(number))? (num_digits==0)?round(number):decimal_shift(round(decimal_shift(number,num_digits)),-(num_digits))
-                      : let(i=(!is_undef(i))?i:len(number)-1)
-                        i==0 ? concat(round_float(number[i],num_digits),v)
-                             : round_float(number,num_digits,  i-1,concat(round_float(number[i],num_digits),v))
+    (!is_list(number))
+    ?   (num_digits==0)?round(number):decimal_shift(round(decimal_shift(number,num_digits)),-(num_digits))
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i==0)
+            ?   concat(round_float(number[i],num_digits),v)
+            :   round_float(number,num_digits,  i-1,concat(round_float(number[i],num_digits),v))
 );
 /*
 #################################################################*/
@@ -1262,10 +1376,12 @@ function round_float(number,num_digits,  i,v=[]) = (
 ##
 #######################################################*/
 function decimal_shift(number,num_digits,  i,v=[]) =
-    (!is_list(number))? (num_digits==0)?number:(number*pow(10,num_digits))/pow(10,num_digits)
-                      : let(i=(!is_undef(i))?i:len(number)-1)
-                        i==0 ? concat(decimal_shift(number[i],num_digits),v)
-                             : decimal_shift(number,num_digits,  i-1,concat(decimal_shift(number[i],num_digits),v));
+    (!is_list(number))
+    ?   (num_digits==0)?number:(number*pow(10,num_digits))/pow(10,num_digits)
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i==0)
+        ?   concat(decimal_shift(number[i],num_digits),v)
+        :   decimal_shift(number,num_digits,  i-1,concat(decimal_shift(number[i],num_digits),v));
 /*#######################################################
 ## Function: misc metric conversions()
 ##
@@ -1295,10 +1411,12 @@ function m2cm(number) = decimal_shift(number, +2);
 ##
 #######################################################*/
 function in2mm(number, i,v=[]) =
-            (!is_list(number))? number*25.4
-                              : let(i=(!is_undef(i))?i:len(number)-1)
-                                i<0? v
-                              : in2mm(number,i-1,concat(in2mm(number[i]),v));
+    (!is_list(number))
+    ?   number*25.4
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i<0)
+        ?   v
+        :   in2mm(number,i-1,concat(in2mm(number[i]),v));
 /*#######################################################
 ## Function: mm2in()
 ##
@@ -1317,15 +1435,18 @@ function in2mm(number, i,v=[]) =
 ##  echo(mm2in(diameter_metric, round=false));
 #######################################################*/
 function mm2in(number, i,v=[], round) =
-            let(round=(!is_undef(round))?round:true)
-            (!is_list(number))? let(in=number*(1/25.4))
-                                (round)? in
-                                        : (number>2)     ? round_float(in,3)
-                                        : (number>0.25)  ? round_float(in,4)
-                                        : round_float(in,5)
-                              : let(i=(!is_undef(i))?i:len(number)-1)
-                                i<0? v
-                              : mm2in(number,i-1,concat(mm2in(number[i],round=round),v),round=round);
+    let(round=(!is_undef(round))?round:true)
+    (!is_list(number))
+    ?   let(in=number*(1/25.4))
+        (round)
+        ?   in
+        :   (number>2)      ? round_float(in,3)
+        :   (number>0.25)   ? round_float(in,4)
+        :   round_float(in,5)
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i<0)
+        ?   v
+        :   mm2in(number,i-1,concat(mm2in(number[i],round=round),v),round=round);
 /*#######################################################
 ## Function: psi2pascal()
 ##
@@ -1346,10 +1467,12 @@ function mm2in(number, i,v=[], round) =
 ##
 #######################################################*/
 function psi2pascal(number, i,v=[]) =
-            (!is_list(number))? number*6894.75729
-                              : let(i=(!is_undef(i))?i:len(number)-1)
-                                i<0? v
-                              : psi2pascal(number,i-1,concat(psi2pascal(number[i]),v));
+    (!is_list(number))
+    ?   number*6894.75729
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i<0)
+        ?   v
+        :   psi2pascal(number,i-1,concat(psi2pascal(number[i]),v));
 /*#######################################################
 ## Function: pascal2psi()
 ##
@@ -1364,10 +1487,12 @@ function psi2pascal(number, i,v=[]) =
 ##
 #######################################################*/
 function pascal2psi(number, i,v=[]) =
-            (!is_list(number))? number/6894.75729
-                              : let(i=(!is_undef(i))?i:len(number)-1)
-                                i<0? v
-                              : pascal2psi(number,i-1,concat(pascal2psi(number[i]),v));
+    (!is_list(number))
+    ?   number/6894.75729
+    :   let(i=(!is_undef(i))?i:len(number)-1)
+        (i<0)
+        ?   v
+        :   pascal2psi(number,i-1,concat(pascal2psi(number[i]),v));
 //example Nm^-1x(1lbfin^-1/175.13Nm^-1)=answer lb/in-
 // Pa = N/(m^2) = kg*m^(-1)*s^(-2)
 // N = kg*m/s^2 = kg*m*s^(-2)
@@ -1400,8 +1525,8 @@ function pascal2psi(number, i,v=[]) =
 function substring(string, start, length) = (
     let(length=(!is_undef(length))?length:len(string)-1)
     (length > 0)
-        ? str(string[start],substring(string, start + 1, length - 1))
-        : ""
+    ?   str(string[start],substring(string, start + 1, length - 1))
+    :   ""
 );
 /*#######################################################
 ## Function: trim()
@@ -1416,10 +1541,10 @@ function substring(string, start, length) = (
 function trim(string) = (
     let(i=len(string)-1)
     (string[0] == " ")
-        ? trim(substring(string,1))
-        : (string[i] == " ")
-            ? trim(substring(string, 0, i-1))
-            : string
+    ?   trim(substring(string,1))
+    :   (string[i] == " ")
+        ?   trim(substring(string, 0, i-1))
+        :   string
 );
 /*#######################################################
 ## Function: pad()
@@ -1437,8 +1562,8 @@ function pad(string,length,char) = (
     let(string=str(string))
     let(char=(!is_undef(char))?char:" ")
     (len(string) > length)
-        ? string
-        : pad(str(char,string),length,char)
+    ?   string
+    :   pad(str(char,string),length,char)
 );
 function lpad(string,length,char) = pad(string,length,char);
 function rpad(string,length,char) = str(string,pad("",length-len(string),char));
@@ -1462,13 +1587,13 @@ function string_to_double(string, i, pos=0, double=0) = (
     (char==" ") ? substring(string,1) :    // Remove leading whitespace
     let(i=(!is_undef(i)) ? i : len(string)-1)
     (i<0)
-        ? double                                // Return "number"
-        : (char==".")
-            ? string_to_double(string, i-1, 0, double/pow(10,pos)) // Set decimal, and reset position
-            : let(num=get_hex_digit(char))
-              (num>-1)
-                ? string_to_double(string, i-1, pos+1, num*pow(10,pos)+double)
-                : num*double                    // Apply negative value
+    ?   double                                // Return "number"
+    :   (char==".")
+        ?   string_to_double(string, i-1, 0, double/pow(10,pos)) // Set decimal, and reset position
+        :   let(num=get_hex_digit(char))
+            (num>-1)
+            ?   string_to_double(string, i-1, pos+1, num*pow(10,pos)+double)
+            :   num*double                    // Apply negative value
 );
 function strtod(string) = string_to_double(string);
 /*#######################################################
@@ -1482,25 +1607,27 @@ function strtod(string) = string_to_double(string);
 ##
 #######################################################*/
 function get_hex_digit(char="") = (
-    len(char) != 1 ? undef :
-    char[0] == "-" ? -1 :
-    char[0] == "0" ?  0 :
-    char[0] == "1" ?  1 :
-    char[0] == "2" ?  2 :
-    char[0] == "3" ?  3 :
-    char[0] == "4" ?  4 :
-    char[0] == "5" ?  5 :
-    char[0] == "6" ?  6 :
-    char[0] == "7" ?  7 :
-    char[0] == "8" ?  8 :
-    char[0] == "9" ?  9 :
+    (len(char) != 1)
+    ? undef
+    : char[0] == "-" ? -1 :
+      char[0] == "0" ?  0 :
+      char[0] == "1" ?  1 :
+      char[0] == "2" ?  2 :
+      char[0] == "3" ?  3 :
+      char[0] == "4" ?  4 :
+      char[0] == "5" ?  5 :
+      char[0] == "6" ?  6 :
+      char[0] == "7" ?  7 :
+      char[0] == "8" ?  8 :
+      char[0] == "9" ?  9 :
     
-    char[0] == "a" ? 10 :
-    char[0] == "b" ? 11 :
-    char[0] == "c" ? 12 :
-    char[0] == "d" ? 13 :
-    char[0] == "e" ? 14 :
-    char[0] == "f" ? 15 : (0/0) // 0/0=nan
+      char[0] == "a" ? 10 :
+      char[0] == "b" ? 11 :
+      char[0] == "c" ? 12 :
+      char[0] == "d" ? 13 :
+      char[0] == "e" ? 14 :
+      char[0] == "f" ? 15 :
+      (0/0) // 0/0=nan
 );
 /*
 #################################################################*/
@@ -1538,13 +1665,14 @@ function flatten(vector) = (
 #######################################################*/
 function quicksort(vector) = (
     !(len(vector)>0)
-        ? []
-        : let(
+    ?   []
+    :   let(
             pivot   = vector[floor(len(vector)/2)],
             lesser  = [ for (y = vector) if (y  < pivot) y ],
             equal   = [ for (y = vector) if (y == pivot) y ],
-            greater = [ for (y = vector) if (y  > pivot) y ])
-          concat(quicksort(lesser), equal, quicksort(greater))
+            greater = [ for (y = vector) if (y  > pivot) y ]
+        )
+        concat(quicksort(lesser), equal, quicksort(greater))
 );
 /*
 #################################################################*/
@@ -1557,7 +1685,7 @@ function quicksort(vector) = (
 ## Section: Functions - VERBOSE/Console Helpers
 */
 /*#######################################################
-## Function: echo_verbose()
+## Function: verbose()
 ##
     Description:
         Helper function to format a larger block of VERBOSE output to the console
@@ -1576,31 +1704,28 @@ function quicksort(vector) = (
             fx      = Boolean to differentiate between "function" and "module"
 ##
 #######################################################*/
-function echo_verbose(reference,formula,equation,solution, fx=true,mod) = (
+function verbose(reference,formula,equation,solution, fx=true,mod) = (
     let(fx=(!is_undef(mod)) ? !mod : fx)
     let(symbol=str(get_symbol(reference,symbols)))
     let(equals=" = ")
     ($VERBOSE==1)
-        ? echo(str(symbol,equals,formula,equals,equation,equals,solution))
-          solution
-        : ($VERBOSE==2)
-            ? let(prefix=(fx)?pad("",5,"#"):pad("",5,"/"))    // len("ECHO:") = 5
-              let(tab="\t")
-              let(indent=pad("",4))
-              let(substitution="Substituting Argument(s) in Formula:")
+    ?   str(symbol,equals,formula,equals,equation,equals,solution)
+    :   ($VERBOSE==2)
+        ?   let(prefix=(fx)?pad("",5,"#"):pad("",5,"/"))    // len("ECHO:") = 5
+            let(tab="\t")
+            let(indent=pad("",4))
+            let(substitution="Substituting Argument(s) in Formula:")
                     
-              let(description=str(get_description(reference,symbols)))
-              let(title=(!is_undef($parent_modules))? str(description," ==> ","[",stack(verbose=$VERBOSE-1),"]"): str(description))
-              let(output=str(
+            let(description=str(get_description(reference,symbols)))
+            let(title=(!is_undef($parent_modules))? str(description," ==> ","[",stack(verbose=$VERBOSE-1),"]"): str(description))
+            let(output=str(
                         title,"\n",
                         ((fx)? str(prefix,tab,substitution,"\n"):""),
                         ((fx)? str(prefix,tab,indent,symbol,equals,formula ,"\n"):""),
                         ((fx)? str(prefix,tab,indent,symbol,equals,equation,"\n"):""),
                         ((fx)? str(prefix,tab,indent,symbol,equals,solution)     :"")))
-              echo(output)
-              solution
-            : echo(formula2equation(formula))           // Helper to build "equation" string in functions
-              solution
+            output
+        : formula2equation(formula)           // Helper to build "equation" string in functions
 );
 /*#######################################################
 ## Function: get_symbol()
@@ -1621,12 +1746,12 @@ function get_symbol(reference, symbols, delimiter) = (
     let(delimiter=(!is_undef(delimiter)) ? delimiter : "|")
     let(index=search([reference],symbols, num_returns_per_match=1)[0])
     (index==[])
-        ? undef
-        : let(aliases=symbols[index][1])
-          let(length=(search(delimiter,aliases, num_returns_per_match=1)[0]))
-          (!is_undef(length))
-            ? substring(aliases,0,length)
-            : aliases
+    ?   undef
+    :   let(aliases=symbols[index][1])
+        let(length=(search(delimiter,aliases, num_returns_per_match=1)[0]))
+        (!is_undef(length))
+        ?   substring(aliases,0,length)
+        :   aliases
 );
 /*#######################################################
 ## Function: get_description()
@@ -1646,11 +1771,11 @@ function get_symbol(reference, symbols, delimiter) = (
 function get_description(reference, symbols) = (
     let(index=search([reference],symbols, num_returns_per_match=1)[0])
     (index==[])
-        ? undef
-        : let(description=symbols[index][2])
-          (!is_undef(description))
-            ? str(description," ","(",reference,")")
-            : ""
+    ?   undef
+    :   let(description=symbols[index][2])
+        (!is_undef(description))
+        ?   str(description," ","(",reference,")")
+        :   ""
 );
 /*#######################################################
 ## Function: stack()
@@ -1663,13 +1788,13 @@ function get_description(reference, symbols) = (
 #######################################################*/
 function stack(idx, verbose=$VERBOSE) = (
     (is_undef($parent_modules))
-        ? "<top-level>"
-        : let(idx=(!is_undef(idx))?idx:$parent_modules-1)
-          let(call=str(idx,"-",parent_module(idx),"()"))
-          let(separator=(verbose==1) ? "" : "\n\t")
-          (idx > 0)
-            ? str(call," : ",separator,stack(idx - 1))
-            : call
+    ?   "<top-level>"
+    :   let(idx=(!is_undef(idx))?idx:$parent_modules-1)
+        let(call=str(idx,"-",parent_module(idx),"()"))
+        let(separator=(verbose==1) ? "" : "\n\t")
+        (idx > 0)
+        ?   str(call," : ",separator,stack(idx - 1))
+        :   call
 );
 /*#######################################################
 ## Function: formula2equation()
@@ -1689,11 +1814,13 @@ function formula2equation(formula,  i, vector) = (
     let(vector=(!is_undef(vector)) ? vector : quicksort(flatten(search(PEMDAS,formula,0))))
     let(i=(!is_undef(i)) ? i : len(vector)-1)
     (i<0)
-        ? str("\nstr(",formula,")\n")
-        : let(comma=((vector[i]+1)==(vector[i+1])) ? "" : (is_undef(vector[i+1])) ? "" : ",")
-          formula2equation(str(substring(formula,0,vector[i]),
-                   ((vector[i]!=0)?",":""),"\"",formula[vector[i]],"\"",comma,
-                   substring(formula,vector[i]+1,len(formula)-1-vector[i])),i-1,vector)
+    ?   str("\nstr(",formula,")\n")
+    :   let(comma=((vector[i]+1)==(vector[i+1])) ? "" : (is_undef(vector[i+1])) ? "" : ",")
+        formula2equation(str(
+            substring(formula,0,vector[i]),
+            ((vector[i]!=0)?",":""),"\"",formula[vector[i]],"\"",comma,
+            substring(formula,vector[i]+1,len(formula)-1-vector[i])),i-1,vector
+        )
 );
 /*
 #################################################################*/
@@ -1788,6 +1915,15 @@ force_chart=[["More Force (MF)",["Smaller (Od)","Less Coils (Na)","Thicker Wire 
         Sut = Minimum tensile strength of material (Wire Strength)
         A   = A kpsi/Mpa
         m   = Exponent
+        
+        Since helical springs experience shear stress, shear yield strength is needed.
+-- If actual data is not available, estimate from tensile strength
+-- Assume yield strength is between 60-90% of tensile strength
+        0.6*Sut<= Ssy<=0.9*Sut
+-- Assume the distortion energy theory can be employed to relate the shear strength to the normal strength.
+        Ssy = 0.577*Sy
+-- This results in
+        0.35*Sut<=Ssy<=0.52*Sut
 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 /*
@@ -1798,20 +1934,23 @@ hard-drawn wire     A227    137         1510        0.201
 chrome vanadium     A232    173         1790        0.155
 chrome silicon      A401    218         1960        ksi 0.091
 
-                    Size range                  Exponent   Constant,Ap
-Material            in.             mm          m           ksi MPa
-Musicwire           0.004-0.250     0.10-6.5    0.146       196 2170
-Oil-temperedwire    0.020-0.500     0.50-12     0.186       149 1880
-Hard-drawnwire      0.028-0.500     0.70-12     0.192       136 1750
-Chromiumvanadium    0.032-0.437     0.80-12     0.167       169 2000
-Chromiumsilicone    0.063-0.375     1.6-10      0.112       202 2000
-302stainlesssteel   0.013-0.10      0.33-2.5    0.146       169 1867
-                    0.10-0.20       2.5-5       0.263       128 2065
-                    0.20-0.4        05-10       0.478       90  2911
-Phosphor-bronze     0.004-0.022     0.1-0.6     0           145 1000
-                    0.022-0.075     0.6-2       0.028       121 913
-                    0.075-0.30      2-7.5       0.064       110 932
-Table 17.2 - Fundamentals of Machine Elements, 3rd ed. Schmid, Hamrock and Jacobson
+
+Shigley’s Mechanical Engineering Design Table 10.4
+                    Size range                   Exponent   Constant,Ap
+Material             in.             mm          m           ksi MPa
+Music wire           0.004-0.250     0.10-6.5    0.146       196 2170
+Oil-tempered wire    0.020-0.500     0.50-12     0.186       149 1880
+Hard-drawn wire      0.028-0.500     0.70-12     0.192       136 1750
+Chromium vanadium    0.032-0.437     0.80-12     0.167       169 2000
+Chromium silicone    0.063-0.375     1.6-10      0.112       202 2000
+302 stainless steel  0.013-0.10      0.33-2.5    0.146       169 1867
+                     0.10-0.20       2.5-5       0.263       128 2065
+                     0.20-0.4        05-10       0.478       90  2911
+Phosphor-bronze      0.004-0.022     0.1-0.6     0           145 1000
+                     0.022-0.075     0.6-2       0.028       121 913
+                     0.075-0.30      2-7.5       0.064       110 932
+Table  17.2:    Coefficients  used  in  Eq.  (17.2)  for  selected  spring  materials.
+Fundamentals of Machine Elements, 3rd ed. Schmid, Hamrock and Jacobson
 */
 
 
@@ -1823,24 +1962,85 @@ A228_common_wire_diameter= [0.100,0.200,0.300,0.400,0.610,0.810,
                             4.50,
                             5.26,
                             6.35];
-                           
+//mechanical_design_peter_r_n_childs
+//Table 11.4
+/*Preferred wire diameters
+Diameter    Diameter    Diameter    Diameter
+(in)        (mm)        (in)        (mm)
+0.004       0.10        0.081       2.00
+0.005       0.12        0.085       2.20
+0.006       0.16        0.092       
+0.008       0.20        0.098       2.50
+0.010       0.25        0.105
+0.012       0.30        0.112       2.80
+0.014       0.35        0.125       3.00
+0.016       0.40       0.135       3.50
+0.018       0.45       0.148
+0.020       0.50       0.162       4.00
+0.022       0.55       0.177       4.50
+0.024       0.60       0.192       5.00
+0.026       0.65       0.207       5.50
+0.028       0.70       0.225       6.00
+0.030       0.80       0.250       6.50
+0.035       0.90       0.281       7.00
+0.038       1.00       0.312       8.00
+0.042       1.10       0.343       9.00
+0.045                   0.362
+0.048       1.20       0.375
+0.051                   0.406       10.0
+0.055       1.40        0.437       11.0
+0.059                   0.469       12.0
+0.063       1.60        0.500       13.0
+0.067                   0.531       14.0
+0.072       1.80        0.562       15.0
+0.076                   0.625       16.0
+*/
 /*
                             ElasticShearDensity,Maximummodulus,modulus,Ε,serviceE,G,kg/m3   temperature,
-High-­‐‑carbonsteels
-Musicwire(ASTMA228)         207(30.0)   79.3(11.5)  7840(0.283) 120(248)
-Harddrawn(ASTMA227)         207(30.0)   79.3(11.5)  7840(0.283) 120(248)
-Stainlesssteels
-Martensitic(AISI410,420)    200(29.0)   75.8(11.0)  7750(0.280) 250(482)
-Austenitic(AISI301,302)     193(28.0)   68.9(9.99)  7840(0.283) 315(600)
-Copper-­‐‑basedalloys
-Springbrass(ASTMB134)       110(15.9)   41.4(6.00)  8520(0.308) 90(194)
-Phosphorbronze(ASTMB159)    103(14.9)   43.4(6.29)  8860(0.320) 90(194)
-Berylliumcopper(ASTMB197)   131(19.0)   44.8(6.50)  8220(0.297) 200(392)
-Nickel-­‐‑basedalloysecnatsisernoisorrochgih;
-htgnertsdooG)006(513)703.0(0058)0.11(8.57)0.13(412006lenocnI
-InconelX-­‐‑750             214(31.0)   75.8(11.0)  8250(0.298) 600(1110)
-omtnatsnoC)                 491(09)     492.0(0418) 06.9(2.66)  0.72(681CnapS-­‐‑iNtemperaturerange
-Table 17.1 Typical properties of common spring materialAdapted from Relvas [1996]
+High-carbon steels
+    Music wire(ASTMA228)            207(30.0)   79.3(11.5)  7840(0.283) 120(248)
+    Hard drawn(ASTMA227)            207(30.0)   79.3(11.5)  7840(0.283) 120(248)
+Stainless steels
+    Martensitic(AISI410,420)        200(29.0)   75.8(11.0)  7750(0.280) 250(482)
+    Austenitic(AISI301,302)         193(28.0)   68.9(9.99)  7840(0.283) 315(600)
+Copper­based alloys
+    Spring brass(ASTMB134)          110(15.9)   41.4(6.00)  8520(0.308) 90(194)
+    Phosphor bronze(ASTMB159)       103(14.9)   43.4(6.29)  8860(0.320) 90(194)
+    Beryllium copper(ASTMB197)      131(19.0)   44.8(6.50)  8220(0.297) 200(392)
+Nickel-­based alloys 
+    Inconnel 600                    214(31.0)   75.8(11.0)  8500(0.307) 315(600)
+    InconelX-750                    214(31.0)   75.8(11.0)  8250(0.298) 600(1110)
+    Ni-Span C-0                     186(27.0)   66.2(9.60)  3140(0.294) 90(194)
+Table 17.1 Typical properties of common spring materials. Source: Adapted from Relvas [1996]
+Fundamentals of Machine Elements, 3rd ed. Schmid, Hamrock and Jacobson (pg 494)
+
+
+mechanical_design_peter_r_n_childs
+Selected data reproduced from Joerres,1996
+Table 11.3
+Typical properties of common spring materials
+                                Young’s             Modulus of          Density         Maximum service
+                                modulus (GPa)       rigidity (GPa)      (kg/m)          temperature (°C)
+Material
+Music wire                      207                 79.3                7860            120
+Hard drawn wire                 207                 79.3                7860            150
+Oil tempered                    207                 79.3                7860            150
+Valve spring                    207                 79.3                7860            150
+Chrome vanadium alloy steel wire 207                79.3                7860            220
+Chrome silicon alloy steel wire 207                 79.3                7860            245
+302 stainless steel             193                 69                  7920            260
+17-7 PH stainless steel         203                 75.8                7810            315
+Phosphor bronze (A)             103                 43.4                8860            95
+Silicon bronze (A)              103                 38.6                8530            95
+Silicon bronze (B)              117                 44.1                8750            95
+Beryllium copper                128                 48.3                8260            205
+Inconel 600                     214                 75.8                8430            320
+Inconel X750                    214                 79.3                8250            595
+AISI 1050                       207                 79.3                7860            95
+AISI 1065                       207                 79.3                7860            95
+AISI 1074                       207                 79.3                7860            120
+AISI 1095                       207                 79.3                7860            120
+
 */
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@ Appendix - Common Wire Materials
@@ -1923,8 +2123,9 @@ hightemp_alloy=[["High Temperature Alloy Wire",concat(A286,Inconel600,Inconel718
     Description:
         ISO 2162-2:1993 - https://www.iso.org/standard/6954.html?browse=tc
         Form, Execution, Ne, Nt, L0, Ls, P
-
-                       A=Plain      C=Plain+Ground  B=Squard|Closed D=Squared+Ground
+    Fundamentals of Machine Elements, Third Edition (SI Version)
+    page 498, Table 17.3
+                        A=Plain      C=Plain+Ground  B=Squard|Closed D=Squared+Ground
     End coils,Ne        0           1               2               2
     Total coils, Nt     Na          Na+1            Na+2            Na+2
     Free length, L0     pNa+d       p(Na+1)         pNa+3d          pNa+2d
