@@ -32,6 +32,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 
+
+
 /*?????????????????????????????????????????????????????????????????
 ??
 /*???????????????????????????????????????????????????????
@@ -68,13 +70,16 @@ N_active=0;         //[0:.001:25]
 
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Section: Derived Variables
+%% Section: Defined/Derived Variables
 */
 /* [Hidden] */
 d   = d_wire;
 Do  = D_outer;
 L0  = L_free;
 Na  = N_active;
+
+background=[250,210];
+background_color=[192,192,192];
 /*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -348,6 +353,23 @@ Therefore containing or releasing energy when a load is applied.
 //    13.    Check whether the spring is likely to buckle.
 //    14.    Specify the spring dimensions.
 }
+create_background(background, background_color);
+module create_background(background, c, a) {
+    translate([0,0,-0.5]) color(c=c/255, alpha=a) square(background);
+}
+/*///////////////////////////////////////////////////////
+// Module: mirror_copy()
+//
+    Description:
+        A custom mirror module that retains the original
+        object in addition to the mirrored one.
+    https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/Tips_and_Tricks#Create_a_mirrored_object_while_retaining_the_original
+//
+///////////////////////////////////////////////////////*/
+module mirror_copy(v = [1, 0, 0]) {
+    children();
+    mirror(v) children();
+}
 /*///////////////////////////////////////////////////////
 // Module: line_up()
 //
@@ -355,16 +377,16 @@ Therefore containing or releasing energy when a load is applied.
         Translates the "child" objects along the [x, y, z] plane
 
     Parameter(s):
-        vector  ([x,y,z] = [0,0,0])
-            vector[0]    = X-axis
-            vector[1]    = Y-axis
-            vector[2]    = Z-axis
+        v  ([x,y,z] = [0,0,0])
+            v[0]    = X-axis
+            v[1]    = Y-axis
+            v[2]    = Z-axis
 //
 ///////////////////////////////////////////////////////*/
-module line_up(vector) {
-    x=(!is_undef(vector[0])) ? vector[0] : 0;
-    y=(!is_undef(vector[1])) ? vector[1] : 0;
-    z=(!is_undef(vector[2])) ? vector[2] : 0;
+module line_up(v) {
+    x=(!is_undef(v[0])) ? v[0] : 0;
+    y=(!is_undef(v[1])) ? v[1] : 0;
+    z=(!is_undef(v[2])) ? v[2] : 0;
     for (i = [0 : 1 : $children-1])
         translate([x*i, y*i, z*i ]) children(i);
 }
@@ -1335,7 +1357,7 @@ function T(r,F,a,  d) = torque(r,F,a,  d);
         num_digits (undef)      = The "width" of the "top" of the profile on X-axis
     *Recursion Parameterss
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
 */
 /* Example: Make sample object
 ##  echo(round_float(5.356,2));
@@ -1370,7 +1392,7 @@ function round_float(number,num_digits,  i,v=[]) = (
         number     (undef)      = Required. The number that you want to round.
     *Recursion Parameterss
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
 */
 /* Example: Make sample object
 ##
@@ -1407,7 +1429,7 @@ function m2cm(number) = decimal_shift(number, +2);
         number     (undef)      = Required. The number that you want to convert
     *Recursion Parameterss
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
 ##
 #######################################################*/
 function in2mm(number, i,v=[]) =
@@ -1427,7 +1449,7 @@ function in2mm(number, i,v=[]) =
         number     (undef)      = Required. The number that you want to convert
     *Recursion Parameterss
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
         round  (true)           = Boolean variable to apply rounding factor to converted number
 */
 /* Examples:
@@ -1463,7 +1485,7 @@ function mm2in(number, i,v=[], round) =
         number     (undef)      = Required. The number that you want to convert
     *Recursion Parameterss
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
 ##
 #######################################################*/
 function psi2pascal(number, i,v=[]) =
@@ -1483,7 +1505,7 @@ function psi2pascal(number, i,v=[]) =
         number     (undef)      = Required. The number that you want to convert
     *Recursion Parameters
         i      (len(number-1)   = Index variable to faciliate tail recursion
-        vector ([])             = Return vector
+        v ([])             = Return vector
 ##
 #######################################################*/
 function pascal2psi(number, i,v=[]) =
@@ -1506,96 +1528,6 @@ function pascal2psi(number, i,v=[]) =
 
 
 
-/*#################################################################
-## Section: Functions - Strings
-*/
-/*#######################################################
-## Function: substring()
-##
-    Description:
-        A string manipulation function that extracts characters from a string to create another string.
-        This attempts to emulate the C++ substr function
-    Parameter(s):
-        (string, start, length)
-            string  = Original character string
-            start   = Integer start position of new string
-            length  = Integer number of characters from start to include in new string
-##
-#######################################################*/
-function substring(string, start, length) = (
-    let(length=(!is_undef(length))?length:len(string)-1)
-    (length > 0)
-    ?   str(string[start],substring(string, start + 1, length - 1))
-    :   ""
-);
-/*#######################################################
-## Function: trim()
-##
-    Description:
-        A string manipulation function that removes leading and trailing spaces from string
-    Parameter(s):
-        (string)
-            string  = Original character string
-##
-#######################################################*/
-function trim(string) = (
-    let(i=len(string)-1)
-    (string[0] == " ")
-    ?   trim(substring(string,1))
-    :   (string[i] == " ")
-        ?   trim(substring(string, 0, i-1))
-        :   string
-);
-/*#######################################################
-## Function: pad()
-##
-    Description:
-        A string manipulation function that adds characters to a string up to a given length
-    Parameter(s):
-        (string, length, char)
-            string  = Original character string
-            length  = Total characters
-            char    = Character to "pad" the original string up to a given length
-##
-#######################################################*/
-function pad(string,length,char) = (
-    let(string=str(string))
-    let(char=(!is_undef(char))?char:" ")
-    (len(string) > length)
-    ?   string
-    :   pad(str(char,string),length,char)
-);
-function lpad(string,length,char) = pad(string,length,char);
-function rpad(string,length,char) = str(string,pad("",length-len(string),char));
-/*#######################################################
-## Function: string_to_double()
-##
-    Description:
-        A string manipulation function that emulats the C++ strtod
-        Converts string to number (integer/float/double)
-    Parameter(s):
-        (string)
-            string  = Original character string
-    *Recursion Parameters
-        i      (len(number-1)   = Index variable to faciliate tail recursion
-        pos    (0)              = Position/Place of character relative to numerical decimal point
-        double (0)              = Return value
-##
-#######################################################*/
-function string_to_double(string, i, pos=0, double=0) = (
-    let(char=string[i])
-    (char==" ") ? substring(string,1) :    // Remove leading whitespace
-    let(i=(!is_undef(i)) ? i : len(string)-1)
-    (i<0)
-    ?   double                                // Return "number"
-    :   (char==".")
-        ?   string_to_double(string, i-1, 0, double/pow(10,pos)) // Set decimal, and reset position
-        :   let(num=get_hex_digit(char))
-            (num>-1)
-            ?   string_to_double(string, i-1, pos+1, num*pow(10,pos)+double)
-            :   num*double                    // Apply negative value
-);
-function strtod(string) = string_to_double(string);
 /*#######################################################
 ## Function: get_hex_digit()
 ##
@@ -1645,12 +1577,12 @@ function get_hex_digit(char="") = (
     Description:
         "Flatten" nested list
     Parameter(s):
-        (vector)
-            vector  = Nested List
+        (v)
+            v  = Nested List
 ##
 #######################################################*/
-function flatten(vector) = (
-    [ for (outer = vector)          // Process Outer List
+function flatten(v) = (
+    [ for (outer = v)          // Process Outer List
       for (inner = outer) inner ]   // Process Inner List
 );
 /*#######################################################
@@ -1659,18 +1591,18 @@ function flatten(vector) = (
     Description:
         Sort a list of numbers by value
     Parameter(s):
-        (vector)
-            vector  = List of numbers
+        (v)
+            v  = List of numbers
 ##
 #######################################################*/
-function quicksort(vector) = (
-    !(len(vector)>0)
+function quicksort(v) = (
+    !(len(v)>0)
     ?   []
     :   let(
-            pivot   = vector[floor(len(vector)/2)],
-            lesser  = [ for (y = vector) if (y  < pivot) y ],
-            equal   = [ for (y = vector) if (y == pivot) y ],
-            greater = [ for (y = vector) if (y  > pivot) y ]
+            pivot   = v[floor(len(v)/2)],
+            lesser  = [ for (y = v) if (y  < pivot) y ],
+            equal   = [ for (y = v) if (y == pivot) y ],
+            greater = [ for (y = v) if (y  > pivot) y ]
         )
         concat(quicksort(lesser), equal, quicksort(greater))
 );
@@ -1805,21 +1737,21 @@ function stack(idx, verbose=$VERBOSE) = (
     Parameter(s):
         formula     = String representation of a formula
     *Recursion Parameters
-        i      (len(vector-1)   = Index variable to faciliate tail recursion
-        vector                  = Vector which contains the known PEMDAS characters
+        i      (len(v-1)   = Index variable to faciliate tail recursion
+        v                  = v which contains the known PEMDAS characters
 ##
 #######################################################*/
-function formula2equation(formula,  i, vector) = (
+function formula2equation(formula,  i, v) = (
     let(PEMDAS=str("(",")","^","*","/","+","-"))
-    let(vector=(!is_undef(vector)) ? vector : quicksort(flatten(search(PEMDAS,formula,0))))
-    let(i=(!is_undef(i)) ? i : len(vector)-1)
+    let(v=(!is_undef(v)) ? v : quicksort(flatten(search(PEMDAS,formula,0))))
+    let(i=(!is_undef(i)) ? i : len(v)-1)
     (i<0)
     ?   str("\nstr(",formula,")\n")
-    :   let(comma=((vector[i]+1)==(vector[i+1])) ? "" : (is_undef(vector[i+1])) ? "" : ",")
+    :   let(comma=((v[i]+1)==(v[i+1])) ? "" : (is_undef(v[i+1])) ? "" : ",")
         formula2equation(str(
-            substring(formula,0,vector[i]),
-            ((vector[i]!=0)?",":""),"\"",formula[vector[i]],"\"",comma,
-            substring(formula,vector[i]+1,len(formula)-1-vector[i])),i-1,vector
+            substring(formula,0,v[i]),
+            ((v[i]!=0)?",":""),"\"",formula[v[i]],"\"",comma,
+            substring(formula,v[i]+1,len(formula)-1-v[i])),i-1,v
         )
 );
 /*
