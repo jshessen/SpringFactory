@@ -10,20 +10,14 @@ I have included STL for each of the components, as rendered from OpenSCAD, as we
 
 All of the code/files are contained within GitHub - SpringFactory
 
+### This program is dependent upon the BOSL Library (included as a Git submodule) 
+BOSL - https://github.com/revarbat/BOSL
+The Belfry OpenScad Library - A library of tools, shapes, and helpers to make OpenScad easier to use.
+
 ```shell
-git clone https://github.com/jshessen/SpringFactory.git
+git clone --recurse-submodules https://github.com/jshessen/SpringFactory.git
 ```
 
 The overall project is also availale on
 - Thingiverse - https://www.thingiverse.com/thing:5248625
 - PrusaPrinters - https://www.prusaprinters.org/prints/134958-spring-factory-parametric
-
-
-### This program is dependent upon the BOSL Library (included as a Git submodule) 
-BOSL - https://github.com/revarbat/BOSL
-The Belfry OpenScad Library - A library of tools, shapes, and helpers to make OpenScad easier to use.
-
-You may require an explicity initialization of the submodule after cloning
-```shell
-git submodule update --init --recursive
-```
