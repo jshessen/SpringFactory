@@ -1,6 +1,6 @@
-[submodule "libs/GHOUL"]
-	path = libs/GHOUL
-	url = https://github.com/jshessen/GHOUL.git
-[submodule "libs/BOSL"]
-	path = libs/BOSL
+[submodule "external/ghoul"]
+	path = external/ghoul
+	url = https://github.com/jshessen/ghoul.git
+[submodule "external/BOSL"]
+	path = external/BOSL
 	url = https://github.com/revarbat/BOSL.git

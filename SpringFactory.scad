@@ -26,7 +26,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 
 // BOSL Library -- https://github.com/revarbat/BOSL
-use <libs/BOSL/threading.scad>;
+use <external/BOSL/threading.scad>;
 use <libs/BOSL/shapes.scad>;
 
 

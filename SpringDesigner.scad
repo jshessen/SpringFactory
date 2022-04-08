@@ -35,7 +35,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 // GHOUL -- https://github.com/jshessen/GHOUL
-include <libs/GHOUL/lib.scad>;
+include <external/ghoul/lib.scad>;
 
 
 
