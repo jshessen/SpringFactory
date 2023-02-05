@@ -77,6 +77,8 @@ custom_bolt_base_diameter=31.983; // [20:.1:80]
 display_screw=1; // [1:Yes,0:No]
 // Diameter of Screw/Nut
 custom_screw_diameter=8; // [.2:0.01:54]
+// Clearance Offset
+custom_offset=0.15; // [0.0:0.01:0.4]
 // Length (X) of the Screw grip
 custom_screw_grip_length=47.8; // [0:.1:100]
 // Pitch of the Screw
@@ -128,6 +130,7 @@ bolt_base_diameter=(bolt_grip_length==59.935) ? custom_bolt_base_diameter :
 
 // The Screw
 screw_diameter=(sync_factory) ? bolt_diameter : custom_screw_diameter;
+screw_offset=custom_offset;
 screw_pitch=(sync_factory) ? bolt_pitch : custom_screw_pitch;            
 screw_grip_length=(sync_factory) ? bolt_grip_length*(47.8/bolt_grip_length) : custom_screw_grip_length;
 // set width/height/diameter relative to screw_grip_length
@@ -265,7 +268,7 @@ module make_SpringFactory(){
         r_x=(display_printable) ? 0 : 180;
         r_z=(display_printable) ? 45 : -90;
         translate([x,y,z]) rotate([r_x,0,r_z]) 
-                make_screw(screw_diameter, screw_grip_height, screw_pitch,
+                make_screw(screw_diameter+screw_offset, screw_grip_height, screw_pitch,
                            screw_grip_length, screw_grip_width, screw_grip_height,
                            screw_base_diameter);
     }
