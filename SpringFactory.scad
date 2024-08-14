@@ -5,7 +5,7 @@
         All rights reserved.
         
         https://github.com/jshessen/SpringFactory
-      
+        
         Parametric OpenSCAD file in support of the "Spring Factory 1.2"
         https://www.thingiverse.com/thing:5171637
         Vincent Baillet
@@ -63,6 +63,8 @@ custom_bolt_diameter=8; // [.01:.01:210]
 custom_bolt_length=47.5; // [10:.1:250]
 // Pitch of the Bolt
 custom_bolt_pitch=2.4; // [0.2:0.01:6]
+// Reference Internal?
+custom_bolt_internal=0; // [1:Yes,0:No]
 // Length (X) of the Bolt grip
 custom_bolt_grip_length=59.935; // [0:.001:100]
 // Width (Y) of the Bolt grip
@@ -116,17 +118,18 @@ custom_cap_pitch=2.4; // [0.2:0.01:6]
 bolt_diameter=custom_bolt_diameter;
 bolt_length=custom_bolt_length;
 bolt_pitch=custom_bolt_pitch;
+bolt_internal=custom_bolt_internal;
 bolt_grip_length=custom_bolt_grip_length;
 // set base width/height/diameter relative to bolt_grip_length
 bolt_grip_width=(bolt_grip_length==59.935) ? custom_bolt_grip_width :
                 ((custom_bolt_grip_width!=5.835) ? custom_bolt_grip_width :
                 bolt_grip_length*(5.385/59.935));
 bolt_grip_height=(bolt_grip_width==5.7835) ? custom_bolt_grip_height :
-                 ((custom_bolt_grip_height!=bolt_grip_width) ? custom_bolt_grip_height :
-                 bolt_grip_width);
+                ((custom_bolt_grip_height!=bolt_grip_width) ? custom_bolt_grip_height :
+                bolt_grip_width);
 bolt_base_diameter=(bolt_grip_length==59.935) ? custom_bolt_base_diameter :
-                   ((custom_bolt_base_diameter!=31.983) ? custom_bolt_base_diameter :
-                   bolt_grip_length*(31.983/59.935));
+                ((custom_bolt_base_diameter!=31.983) ? custom_bolt_base_diameter :
+                bolt_grip_length*(31.983/59.935));
 
 // The Screw
 screw_diameter=(sync_factory) ? bolt_diameter : custom_screw_diameter;
@@ -135,22 +138,22 @@ screw_pitch=(sync_factory) ? bolt_pitch : custom_screw_pitch;
 screw_grip_length=(sync_factory) ? bolt_grip_length*(47.8/bolt_grip_length) : custom_screw_grip_length;
 // set width/height/diameter relative to screw_grip_length
 screw_grip_width=(sync_factory) ? screw_grip_length*(5.835/47.8) :
-                 ((custom_screw_grip_width!=5.835) ? custom_screw_grip_width :
-                 screw_grip_length*(5.835/47.8));
+                ((custom_screw_grip_width!=5.835) ? custom_screw_grip_width :
+                screw_grip_length*(5.835/47.8));
 screw_grip_height=(sync_factory) ? screw_grip_width*(6.62/5.835) :
-                  ((custom_screw_grip_height!=6.62) ? custom_screw_grip_height :
-                  screw_grip_width*(6.62/5.835));
+                ((custom_screw_grip_height!=6.62) ? custom_screw_grip_height :
+                screw_grip_width*(6.62/5.835));
 screw_base_diameter=(sync_factory) ? bolt_diameter*(14.9836/8) :
                     ((custom_screw_base_diameter!=14.9836) ? custom_screw_base_diameter :
                     screw_grip_length*(14.9836/47.8));
 
 //The Cap
 cap_diameter=(sync_factory) ? bolt_diameter :
-             ((custom_cap_diameter==0) ? bolt_diameter :
-             custom_cap_diameter);
+            ((custom_cap_diameter==0) ? bolt_diameter :
+            custom_cap_diameter);
 cap_pitch=(sync_factory) ? bolt_pitch :
-          ((custom_cap_pitch==0) ? bolt_pitch :
-          custom_cap_pitch);
+            ((custom_cap_pitch==0) ? bolt_pitch :
+            custom_cap_pitch);
 cap_rotations=custom_cap_rotations*cap_pitch;
 /*
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -215,7 +218,7 @@ module show_reference_objects(){
         z=(display_printable) ? 0 : bolt_length*(.95-(screw_pitch/100));
         r_x=(display_printable) ? 0 : 180;
         r_z=(display_printable) ? -45 : 0;
-       
+
         translate([x,y,z]) rotate([r_x,0,r_z]) color(c=c,alpha=0.75)
             translate([x_origin,y_origin,z_origin])
                 import("./reference/SpringFactory1.2_TheScrew.stl");
@@ -249,13 +252,13 @@ module show_reference_objects(){
         N/A
 */
 // Example: Make sample objects
-   make_SpringFactory();
+    make_SpringFactory();
 ///////////////////////////////////////////////////////*/
 module make_SpringFactory(){
     if(display_bolt){
         make_bolt(bolt_diameter, bolt_length, bolt_pitch,
-                  bolt_grip_length, bolt_grip_width, bolt_grip_height,
-                  bolt_base_diameter);
+                bolt_grip_length, bolt_grip_width, bolt_grip_height,
+                bolt_base_diameter);
     }
     if(display_screw){
         x=(display_printable) ?
@@ -269,8 +272,8 @@ module make_SpringFactory(){
         r_z=(display_printable) ? 45 : -90;
         translate([x,y,z]) rotate([r_x,0,r_z]) 
                 make_screw(screw_diameter+screw_offset, screw_grip_height, screw_pitch,
-                           screw_grip_length, screw_grip_width, screw_grip_height,
-                           screw_base_diameter);
+                            screw_grip_length, screw_grip_width, screw_grip_height,
+                            screw_base_diameter);
     }
     if(display_cap){
         x=(display_bolt || display_screw) ? (bolt_base_diameter/2)+(cap_diameter*1.2) : 0;
@@ -302,8 +305,8 @@ module make_SpringFactory(){
 //   make_bolt(bolt_diameter, bolt_length, bolt_pitch, bolt_grip_length, bolt_grip_width, bolt_grip_height, bolt_base_diameter);
 ///////////////////////////////////////////////////////*/
 module make_bolt(d,l,pitch,
-                 grip_length, grip_width, grip_height,
-                 base_diameter){
+                grip_length, grip_width, grip_height,
+                base_diameter){
     union(){
         // Base
         if($VERBOSE) echo("--> Make \"Bolt\" Base");
@@ -397,7 +400,7 @@ module make_bolt_thread(d,l,pitch){
     if($VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
     if($VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
     translate([0,0,l/2])
-        threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
+        threaded_rod(d=d, l=l, pitch=pitch,internal=bolt_internal, $fa=1, $fs=1);
 }
 /*///////////////////////////////////////////////////////
 // Module: make_bolt_wire_eyelet()
@@ -524,8 +527,8 @@ module make_bolt_wire_catch(width,height,extension,radius, angle=0, z_rotation=0
 //   make_screw(screw_diameter, screw_grip_height, screw_pitch, screw_grip_length, screw_grip_width, screw_grip_height, screw_base_diameter);
 ///////////////////////////////////////////////////////*/
 module make_screw(d,l,pitch,
-                  grip_length,grip_width,grip_height,
-                  base_diameter){
+                grip_length,grip_width,grip_height,
+                base_diameter){
     union(){
         difference(){
             union(){
@@ -552,9 +555,9 @@ module make_screw(d,l,pitch,
             if($VERBOSE) echo(str("**======> Thread Height (Z): ",l,"**"));
             if($VERBOSE) echo(str("**======> Thread Pitch (P): ",pitch,"**"));
             if(display_cutouts){
-                #threaded_rod(d=d, l=l*2.5, pitch=pitch, $fa=1, $fs=1);
+                #threaded_rod(d=d, l=l*2.5, pitch=pitch, internal=bolt_internal, $fa=1, $fs=1);
             } else {
-                threaded_rod(d=d, l=l*2.5, pitch=pitch, $fa=1, $fs=1);
+                threaded_rod(d=d, l=l*2.5, pitch=pitch, internal=bolt_internal, $fa=1, $fs=1);
             }
         }
         // Wire Eyelet
@@ -642,7 +645,7 @@ module make_cap(d,l,pitch){
     translate([0,0,l/2]) {
         difference(){
             union(){
-                threaded_rod(d=d, l=l, pitch=pitch, $fa=1, $fs=1);
+                threaded_rod(d=d, l=l, pitch=pitch, internal=bolt_internal, $fa=1, $fs=1);
                 //cylinder(h=l,d=d*1.124,center=true, $fn=360);
                 translate([0,0,-l/2]) linear_extrude(pitch*.24)
                     circle(d=base, $fn=360);
