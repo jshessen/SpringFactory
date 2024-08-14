@@ -130,6 +130,7 @@ bolt_grip_height=(bolt_grip_width==5.7835) ? custom_bolt_grip_height :
 bolt_base_diameter=(bolt_grip_length==59.935) ? custom_bolt_base_diameter :
                 ((custom_bolt_base_diameter!=31.983) ? custom_bolt_base_diameter :
                 bolt_grip_length*(31.983/59.935));
+bolt_offset=0.5;
 
 // The Screw
 screw_diameter=(sync_factory) ? bolt_diameter : custom_screw_diameter;
@@ -146,6 +147,7 @@ screw_grip_height=(sync_factory) ? screw_grip_width*(6.62/5.835) :
 screw_base_diameter=(sync_factory) ? bolt_diameter*(14.9836/8) :
                     ((custom_screw_base_diameter!=14.9836) ? custom_screw_base_diameter :
                     screw_grip_length*(14.9836/47.8));
+
 
 //The Cap
 cap_diameter=(sync_factory) ? bolt_diameter :
@@ -180,7 +182,7 @@ if(show_reference_model){
 }
 ///////////////////////////////////////////////////////*/
 module show_reference_objects(){
-    offset=(offset_reference_model) ? (bolt_base_diameter*.5)+(screw_grip_length) : 0;
+    offset=(offset_reference_model) ? (bolt_base_diameter*bolt_offset)+(screw_grip_length) : 0;
     // The Bolt
     if(display_bolt){
         // Shift Import to [0,0,0]
@@ -211,7 +213,7 @@ module show_reference_objects(){
         // Offset
         x=(display_printable) ?
             ((display_bolt) ?
-                offset+(bolt_base_diameter*.4)+(screw_base_diameter*.5) :
+                offset+(bolt_base_diameter*bolt_offset)+screw_grip_width :
                 offset) :
             offset;
         y=(display_bolt) ? x-offset : 0;
@@ -233,9 +235,10 @@ module show_reference_objects(){
         // Set Color
         c=[138,43,226]/255;
         // Offset
-        x=(display_bolt || display_screw) ? offset + (bolt_base_diameter/2)+(cap_diameter*1.2) : offset;
+        x=(display_bolt || display_screw) ? offset + (bolt_base_diameter*bolt_offset)+screw_grip_width : offset;
+        y=(display_bolt) ? x-offset : 0;
         r=-15;
-        translate([x,0,0]) rotate([0,0,r]) color(c=c,alpha=0.75)
+        translate([x,y/4,0]) rotate([0,0,r]) color(c=c,alpha=0.75)
             translate([x_origin,y_origin,z_origin])
                 import("./reference/SpringFactory1.2_TheCap.stl");
     }
@@ -263,7 +266,7 @@ module make_SpringFactory(){
     if(display_screw){
         x=(display_printable) ?
             ((display_bolt) ?
-                (bolt_base_diameter*.4)+(screw_base_diameter*.5) :
+                (bolt_base_diameter*bolt_offset)+screw_grip_width :
                 0) :
             0;
         y=x;
@@ -276,8 +279,9 @@ module make_SpringFactory(){
                             screw_base_diameter);
     }
     if(display_cap){
-        x=(display_bolt || display_screw) ? (bolt_base_diameter/2)+(cap_diameter*1.2) : 0;
-        translate([x,0,0])
+        x=(display_bolt || display_screw) ? (bolt_base_diameter*bolt_offset)+screw_grip_width : 0;
+        y=(display_bolt) ? x : 0;
+        translate([x,y/4,0])
             make_cap(cap_diameter, cap_rotations, cap_pitch);
     }
 }
